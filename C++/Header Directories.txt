@@ -1,0 +1,6 @@
+/usr/include/opencv4
+/opt/vcpkg/installed/arm64-linux/include
+/usr/include/libcamera
+/usr/local/include
+/usr/local/include/c++
+/opt/vcpkg/installed/arm64-linux/include/ncnn
