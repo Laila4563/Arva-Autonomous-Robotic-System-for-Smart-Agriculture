@@ -113,7 +113,7 @@ void DeepSortModel::postprocess(cv::Mat& frame, const std::vector<Object>& outs,
 
 
 
-void DeepSortModel::matchDeepSortResult(DeepSortResult& ds_result, std::vector<Object>& dets, float iou_threshold) {
+void DeepSortModel::matchDeepSortResult(DeepSortResult& ds_result, std::vector<Object>& dets) {
     ds_result.score = 0.f; ds_result.class_id = -1;
     for (int i = 0; i < dets.size(); i++)
     { 
