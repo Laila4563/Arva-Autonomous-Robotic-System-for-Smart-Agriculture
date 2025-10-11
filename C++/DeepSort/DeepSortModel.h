@@ -33,7 +33,7 @@ private:
     void get_detections(const cv::Rect_<float>& rect, float confidence, DETECTIONS& d);
     void postprocess(cv::Mat& frame, const std::vector<Object>& outs, DETECTIONS& d);
 
-    void matchDeepSortResult(DeepSortResult& ds_result, std::vector<Object>& dets, float iou_threshold = 0.5f);
+    void matchDeepSortResult(DeepSortResult& ds_result, std::vector<Object>& dets);
     std::unique_ptr<DeepSort> deepSort_;   
     std::unique_ptr<tracker> id_tracker_;
 };
