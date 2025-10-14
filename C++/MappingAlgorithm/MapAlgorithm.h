@@ -16,10 +16,6 @@
 #endif
 using json = nlohmann::json;
 
-// Define robot size in terms of map grid units (cells)
-static constexpr int ROBOT_WIDTH_CELLS = 2;  // Example: robot is 2 cells wide
-static constexpr int ROBOT_HEIGHT_CELLS = 2; // Example: robot is 2 cells high
-
 class Map
 {
 public:
@@ -37,9 +33,13 @@ private:
     char **dirMap;
     int rows, cols;
     int originRow, originCol;
-    float currentX, currentY;
+    float currentX, currentY, targetX = -1, targetY = -1;
     float lastAngle = 90.0f;
     int prealloc_cm = 0;
+
+    float robotLengthCm;
+    float robotWidthCm;
+    float marginCells;
 
     static constexpr int precision = 4;
     std::function<void()> onUpdate = nullptr;
@@ -49,13 +49,12 @@ private:
     int **allocateArray(int newRows, int newCols);
     char **allocateDirArray(int newRows, int newCols);
     void ensureFit(int newRow, int newCol);
-    void internalUpdate(float cm, float angle); // updated
+    void internalUpdate(float cm, float angle);
 
 public:
-    Map();
+    Map(float lengthCM, float widthCM);
 
     ~Map();
-
     void setOnUpdate(std::function<void()> handler);
     void setOnContinous(std::function<void(int)> handler);
     void setOnChange(std::function<void(int, float)> handler);
@@ -65,15 +64,12 @@ public:
     void updateAngle(float angle);
     void print() const;
     void printValues() const;
+    void setTargetLocation(float x, float y);
     float snapToNearestRightAngle(float angle);
-    Direction nextMove() const;
+    Direction nextMove();
     float normalizeAngle(float angle);
     float calculateRelativeAngle(float prevAngle, float currentAngle);
     void apply(Direction movement);
     json mapAsJson();
-
-    // new functions
-    void markRobotArea(int centerY, int centerX);
-    std::vector<Direction> findPathToTarget(int targetRow, int targetCol);
-    void visualizeMap(const std::string &windowName = "Map") const;
+    cv::Mat generatePicture();
 };

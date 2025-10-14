@@ -84,20 +84,34 @@ void Map::internalUpdate(float cm, float angle)
         int mapX = std::round(currentX);
         int mapY = std::round(currentY);
 
-        ensureFit(mapY, mapX);
+        // ensureFit(mapY, mapX);
+        ensureFit(mapY + marginCells, mapX + marginCells);
+        ensureFit(mapY - marginCells, mapX - marginCells);
 
         mapX = std::round(currentX);
         mapY = std::round(currentY);
 
-        // array[mapY][mapX] = 1;
         // dirMap[mapY][mapX] = directionChar;
-
-        markRobotArea(mapY, mapX);
+        for (int r = mapY - marginCells; r <= mapY + marginCells; ++r)
+        {
+            for (int c = mapX - marginCells; c <= mapX + marginCells; ++c)
+            {
+                // Safety check, although ensureFit should cover this now
+                if (r >= 0 && r < rows && c >= 0 && c < cols)
+                {
+                    dirMap[r][c] = directionChar;
+                }
+            }
+        }
     }
 }
 
-Map::Map() : rows(1), cols(1), originRow(0), originCol(0), currentX(0), currentY(0)
+Map::Map(float lengthCM, float widthCM) : rows(1), cols(1), originRow(0), originCol(0), currentX(0), currentY(0)
 {
+    float maxDimCm = std::max(lengthCM, widthCM);
+
+    marginCells = static_cast<int>(std::ceil((maxDimCm / 2.0f) / precision));
+
     array = allocateArray(rows, cols);
     dirMap = allocateDirArray(rows, cols);
     array[originRow][originCol] = 0;
@@ -199,6 +213,12 @@ void Map::printValues() const
     }
 }
 
+void Map::setTargetLocation(float x, float y)
+{
+    targetX = x;
+    targetY = y;
+}
+
 float Map::snapToNearestRightAngle(float angle)
 {
     angle = fmod(angle, 360.0f);
@@ -222,168 +242,146 @@ float Map::snapToNearestRightAngle(float angle)
     return closest;
 }
 
-Map::Direction Map::nextMove() const
+Map::Direction Map::nextMove()
 {
-
-    int startRow = static_cast<int>(std::round(currentY));
-    int startCol = static_cast<int>(std::round(currentX));
-
-    auto inBounds = [this](int r, int c) -> bool
+    if (targetY == -1 || targetX == -1)
     {
-        return (r >= 0 && r < rows && c >= 0 && c < cols);
-    };
-
-    typedef std::pair<int, int> Cell;
-    std::vector<std::vector<bool>> external(rows, std::vector<bool>(cols, false));
-    std::queue<Cell> extQueue;
-
-    for (int r = 0; r < rows; ++r)
-    {
-        for (int c : {0, cols - 1})
-        {
-            if (inBounds(r, c) && array[r][c] == 0 && !external[r][c])
-            {
-                external[r][c] = true;
-                extQueue.push({r, c});
-            }
-        }
-    }
-    for (int c = 0; c < cols; ++c)
-    {
-        for (int r : {0, rows - 1})
-        {
-            if (inBounds(r, c) && array[r][c] == 0 && !external[r][c])
-            {
-                external[r][c] = true;
-                extQueue.push({r, c});
-            }
-        }
-    }
-
-    const int ext_dr[4] = {-1, 1, 0, 0};
-    const int ext_dc[4] = {0, 0, -1, 1};
-    while (!extQueue.empty())
-    {
-        Cell cur = extQueue.front();
-        extQueue.pop();
-        for (int i = 0; i < 4; ++i)
-        {
-            int nr = cur.first + ext_dr[i];
-            int nc = cur.second + ext_dc[i];
-            if (inBounds(nr, nc) && !external[nr][nc] && array[nr][nc] == 0)
-            {
-                external[nr][nc] = true;
-                extQueue.push({nr, nc});
-            }
-        }
-    }
-
-    struct Step
-    {
-        int dr, dc;
-        Direction dir;
-    };
-    const Step steps[] = {
-        {-1, 0, Direction::Top},
-        {1, 0, Direction::Bottom},
-        {0, -1, Direction::Left},
-        {0, 1, Direction::Right}};
-    for (const auto &step : steps)
-    {
-        int nr = startRow + step.dr;
-        int nc = startCol + step.dc;
-        if (inBounds(nr, nc) && array[nr][nc] == 0 && !external[nr][nc])
-        {
-            return step.dir;
-        }
-    }
-
-    typedef std::pair<int, int> Cell;
-    std::vector<std::vector<bool>> bfsVisited(rows, std::vector<bool>(cols, false));
-    std::vector<std::vector<Cell>> parent(rows, std::vector<Cell>(cols, {-1, -1}));
-
-    std::queue<Cell> q;
-    q.push({startRow, startCol});
-    bfsVisited[startRow][startCol] = true;
-
-    Cell target = {-1, -1};
-    bool found = false;
-
-    while (!q.empty() && !found)
-    {
-        Cell cur = q.front();
-        q.pop();
-
-        if (array[cur.first][cur.second] == 0 &&
-            !(cur.first == startRow && cur.second == startCol) &&
-            !external[cur.first][cur.second])
-        {
-            target = cur;
-            found = true;
-            break;
-        }
-
-        for (const auto &step : steps)
-        {
-            int nr = cur.first + step.dr;
-            int nc = cur.second + step.dc;
-            if (inBounds(nr, nc) && !bfsVisited[nr][nc] && !external[nr][nc])
-            {
-                bfsVisited[nr][nc] = true;
-                parent[nr][nc] = cur;
-                q.push({nr, nc});
-            }
-        }
-    }
-
-    if (!found)
         return Direction::Done;
-
-    std::vector<Cell> path;
-    for (Cell cur = target; cur.first != -1; cur = parent[cur.first][cur.second])
-    {
-        path.push_back(cur);
-        if (cur.first == startRow && cur.second == startCol)
-            break;
     }
-    std::reverse(path.begin(), path.end());
 
-    if (path.size() < 2)
+    int curCol = static_cast<int>(std::round(currentX));
+    int curRow = static_cast<int>(std::round(currentY));
+    int tgtCol = static_cast<int>(std::round(targetX));
+    int tgtRow = static_cast<int>(std::round(targetY));
+
+    const float doneThreshold = 0.5f;
+    if (std::hypot(targetX - currentX, targetY - currentY) <= doneThreshold)
+    {
         return Direction::Done;
+    }
 
-    Cell nextCell = path[1];
-    int dRow = nextCell.first - startRow;
-    int dCol = nextCell.second - startCol;
+    int dx = tgtCol - curCol;
+    int dy = tgtRow - curRow;
 
-    if (dRow == -1 && dCol == 0)
-        return Direction::Top;
-    if (dRow == 1 && dCol == 0)
-        return Direction::Bottom;
-    if (dRow == 0 && dCol == -1)
-        return Direction::Left;
-    if (dRow == 0 && dCol == 1)
-        return Direction::Right;
-
-    int candARow = startRow + dRow;
-    int candACol = startCol;
-    int candBRow = startRow;
-    int candBCol = startCol + dCol;
-
-    auto manhattanDist = [&](int r, int c)
+    auto isFree = [&](int r, int c) -> bool
     {
-        return std::abs(r - target.first) + std::abs(c - target.second);
+        // if (r < 0 || r >= rows || c < 0 || c >= cols)
+        // {
+
+        //     return true;
+        // }
+        // return array[r][c] == 0;
+
+        // 1. Iterate over the robot's bounding box area, defined by marginCells,
+        //    centered around the proposed move (r, c).
+        for (int rowCheck = r - marginCells; rowCheck <= r + marginCells; ++rowCheck)
+        {
+            for (int colCheck = c - marginCells; colCheck <= c + marginCells; ++colCheck)
+            {
+                // 2. Boundary Check: If the robot's margin extends outside the current map area,
+                //    it is considered a collision (not free).
+                if (rowCheck < 0 || rowCheck >= rows || colCheck < 0 || colCheck >= cols)
+                {
+                    return false; // Collision with map boundary/wall
+                }
+
+                // 3. Obstacle Check: If any cell in the robot's bounding box is an obstacle (1),
+                //    the move is not free.
+                if (array[rowCheck][colCheck] == 1)
+                {
+                    return false; // Collision with an obstacle
+                }
+            }
+        }
+        return true; // The entire robot area is free
     };
-    int distA = manhattanDist(candARow, candACol);
-    int distB = manhattanDist(candBRow, candBCol);
 
-    if (distA <= distB)
+    auto manhattan = [&](int r, int c) -> int
     {
-        return (dRow < 0) ? Direction::Top : Direction::Bottom;
+        return std::abs(tgtRow - r) + std::abs(tgtCol - c);
+    };
+
+    std::vector<std::pair<Direction, std::pair<int, int>>> candidates;
+    bool preferX = (std::abs(dx) >= std::abs(dy));
+
+    auto pushCandidate = [&](Direction dir, int r, int c)
+    {
+        candidates.emplace_back(dir, std::make_pair(r, c));
+    };
+
+    if (preferX)
+    {
+        if (dx > 0)
+            pushCandidate(Direction::Right, curRow, curCol + 1);
+        else if (dx < 0)
+            pushCandidate(Direction::Left, curRow, curCol - 1);
+
+        if (dy > 0)
+            pushCandidate(Direction::Bottom, curRow + 1, curCol);
+        else if (dy < 0)
+            pushCandidate(Direction::Top, curRow - 1, curCol);
     }
     else
     {
-        return (dCol < 0) ? Direction::Left : Direction::Right;
+        if (dy > 0)
+            pushCandidate(Direction::Bottom, curRow + 1, curCol);
+        else if (dy < 0)
+            pushCandidate(Direction::Top, curRow - 1, curCol);
+
+        if (dx > 0)
+            pushCandidate(Direction::Right, curRow, curCol + 1);
+        else if (dx < 0)
+            pushCandidate(Direction::Left, curRow, curCol - 1);
     }
+
+    pushCandidate(Direction::Top, curRow - 1, curCol);
+    pushCandidate(Direction::Bottom, curRow + 1, curCol);
+    pushCandidate(Direction::Left, curRow, curCol - 1);
+    pushCandidate(Direction::Right, curRow, curCol + 1);
+
+    std::vector<std::pair<Direction, std::pair<int, int>>> uniqueCandidates;
+    for (auto &p : candidates)
+    {
+        bool seen = false;
+        for (auto &q : uniqueCandidates)
+        {
+            if (q.first == p.first)
+            {
+                seen = true;
+                break;
+            }
+        }
+        if (!seen)
+            uniqueCandidates.push_back(p);
+    }
+
+    int currentDist = manhattan(curRow, curCol);
+    for (auto &c : uniqueCandidates)
+    {
+        int nr = c.second.first;
+        int nc = c.second.second;
+        if (!isFree(nr, nc))
+            continue;
+        int newDist = manhattan(nr, nc);
+        if (newDist < currentDist)
+        {
+            return c.first;
+        }
+    }
+
+    for (auto &c : uniqueCandidates)
+    {
+        int nr = c.second.first;
+        int nc = c.second.second;
+        if (isFree(nr, nc))
+        {
+            return c.first;
+        }
+    }
+
+    targetX = -1;
+    targetY = -1;
+    return Direction::Done;
 }
 
 float Map::normalizeAngle(float angle)
@@ -479,193 +477,114 @@ json Map::mapAsJson()
     return jsonObject;
 }
 
-// new functions
-//  ============================================================================
-//  Function: markRobotArea
-//  Purpose : Marks a rectangular area around the robot's current position
-//            on the occupancy grid instead of a single point. This creates
-//            an adaptive robot footprint (e.g., 2x2 cells) so the robot
-//            occupies an area rather than one cell.
-//
-//  Params  : centerY, centerX - robot's current center coordinates in grid cells
-//  ============================================================================
-void Map::markRobotArea(int centerY, int centerX)
+cv::Mat Map::generatePicture()
 {
-    // Calculate half dimensions of the robot footprint in cells
-    int halfW = ROBOT_WIDTH_CELLS / 2;
-    int halfH = ROBOT_HEIGHT_CELLS / 2;
+    const int minFinalWidth = 1280;
+    const int minFinalHeight = 720;
+    const int baseCellPixelSize = 10;
 
-    // Define the rectangular area (top-left and bottom-right corners)
-    int minRow = centerY - halfH;
-    int maxRow = centerY + halfH;
-    int minCol = centerX - halfW;
-    int maxCol = centerX + halfW;
+    int gridWidth = cols * baseCellPixelSize;
+    int gridHeight = rows * baseCellPixelSize;
 
-    // Ensure that the map is large enough to include this area
-    ensureFit(minRow, minCol);
-    ensureFit(maxRow, maxCol);
+    int currentColIdx = static_cast<int>(std::round(currentX));
+    int currentRowIdx = static_cast<int>(std::round(currentY));
+    int targetColIdx = static_cast<int>(std::round(targetX));
+    int targetRowIdx = static_cast<int>(std::round(targetY));
 
-    // Clamp rectangle boundaries within valid map dimensions
-    minRow = std::max(0, minRow);
-    minCol = std::max(0, minCol);
-    maxRow = std::min(rows - 1, maxRow);
-    maxCol = std::min(cols - 1, maxCol);
+    int robotDrawMargin = marginCells;
 
-    // Mark all cells in the robot’s footprint area
-    for (int r = minRow; r <= maxRow; ++r)
+    cv::Mat gridImage(gridHeight, gridWidth, CV_8UC3, cv::Scalar(0, 0, 0));
+    for (int i = 0; i < rows; i++)
     {
-        for (int c = minCol; c <= maxCol; ++c)
+        for (int j = 0; j < cols; j++)
         {
-            if (r >= 0 && r < rows && c >= 0 && c < cols)
+
+            if (i == currentRowIdx && j == currentColIdx)
             {
-                array[r][c] = 1;    // mark as occupied / visited
-                dirMap[r][c] = 'R'; // mark as robot presence
+                cv::rectangle(gridImage,
+                              cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+                              cv::Scalar(0, 255, 0),
+                              cv::FILLED);
             }
-        }
-    }
-}
-
-// ============================================================================
-// Function: findPathToTarget
-// Purpose : Uses Breadth-First Search (BFS) to find the shortest path
-//           from the robot’s current grid location to a target location.
-//           Returns a sequence of movement directions to reach the goal.
-//
-// Params  : targetRow, targetCol - target cell coordinates in the map
-// Returns : vector<Direction> representing the step-by-step directions
-// ============================================================================
-std::vector<Map::Direction> Map::findPathToTarget(int targetRow, int targetCol)
-{
-    typedef std::pair<int, int> Cell; // shorthand for a grid cell (row, col)
-
-    // Lambda to check if a cell is within the map boundaries
-    auto inBounds = [this](int r, int c)
-    {
-        return r >= 0 && r < rows && c >= 0 && c < cols;
-    };
-
-    // BFS data structures
-    std::queue<Cell> q; // queue for BFS exploration
-    std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
-    std::vector<std::vector<Cell>> parent(rows, std::vector<Cell>(cols, {-1, -1}));
-
-    // Start from the robot’s current (rounded) position
-    int startR = static_cast<int>(std::round(currentY));
-    int startC = static_cast<int>(std::round(currentX));
-
-    q.push({startR, startC});
-    visited[startR][startC] = true;
-
-    // Movement offsets for 4 possible directions (up, down, left, right)
-    const int dr[4] = {-1, 1, 0, 0};
-    const int dc[4] = {0, 0, -1, 1};
-    const Direction dirs[4] = {Direction::Top, Direction::Bottom, Direction::Left, Direction::Right};
-
-    bool found = false;
-
-    // Perform BFS traversal until target is found or queue is empty
-    while (!q.empty() && !found)
-    {
-        auto [r, c] = q.front();
-        q.pop();
-
-        // Check if we've reached the target cell
-        if (r == targetRow && c == targetCol)
-        {
-            found = true;
-            break;
-        }
-
-        // Explore 4 neighboring cells
-        for (int i = 0; i < 4; ++i)
-        {
-            int nr = r + dr[i]; // new row
-            int nc = c + dc[i]; // new column
-
-            // Only enqueue valid, unvisited, and non-blocked cells
-            if (inBounds(nr, nc) && !visited[nr][nc] && array[nr][nc] == 0)
+            else if (i == targetRowIdx && j == targetColIdx)
             {
-                visited[nr][nc] = true;
-                parent[nr][nc] = {r, c}; // remember where we came from
-                q.push({nr, nc});
+                cv::rectangle(gridImage,
+                              cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+                              cv::Scalar(255, 0, 0),
+                              cv::FILLED);
+            }
+            else if (array[i][j] == 1)
+            {
+                cv::rectangle(gridImage,
+                              cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+                              cv::Scalar(255, 255, 255),
+                              cv::FILLED);
+            }
+            else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
+            {
+                cv::rectangle(gridImage,
+                              cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+                              cv::Scalar(255, 255, 255),
+                              cv::FILLED);
             }
         }
     }
 
-    std::vector<Direction> path;
+    cv::Mat gray;
+    cv::cvtColor(gridImage, gray, cv::COLOR_BGR2GRAY);
+    cv::Mat edges;
+    cv::Canny(gray, edges, 50, 150, 3);
 
-    // If target not found, return empty path
-    if (!found)
-        return path;
+    std::vector<cv::Vec4i> detectedLines;
+    cv::HoughLinesP(edges, detectedLines, 1, CV_PI / 180, 30, 30, 5);
 
-    // Reconstruct path by walking backwards from target → start
-    Cell cur = {targetRow, targetCol};
-    while (!(cur.first == startR && cur.second == startC))
+    double scaleFactor = 1.5;
+
+    int scaledGridWidth = static_cast<int>(gridWidth * scaleFactor);
+    int scaledGridHeight = static_cast<int>(gridHeight * scaleFactor);
+
+    int finalWidth = std::max(minFinalWidth, scaledGridWidth);
+    int finalHeight = std::max(minFinalHeight, scaledGridHeight);
+
+    int offsetX = (finalWidth - scaledGridWidth) / 2;
+    int offsetY = (finalHeight - scaledGridHeight) / 2;
+
+    cv::Mat finalImage(finalHeight, finalWidth, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    for (int i = 0; i < rows; i++)
     {
-        Cell prev = parent[cur.first][cur.second];
-        if (prev.first == -1)
-            break; // safety check (no parent)
-
-        // Determine direction moved between previous and current cell
-        int dr_ = cur.first - prev.first;
-        int dc_ = cur.second - prev.second;
-
-        if (dr_ == -1 && dc_ == 0)
-            path.push_back(Direction::Top);
-        else if (dr_ == 1 && dc_ == 0)
-            path.push_back(Direction::Bottom);
-        else if (dr_ == 0 && dc_ == -1)
-            path.push_back(Direction::Left);
-        else if (dr_ == 0 && dc_ == 1)
-            path.push_back(Direction::Right);
-
-        cur = prev; // step back to continue reconstructing
-    }
-
-    // Reverse the path to go from start → target
-    std::reverse(path.begin(), path.end());
-    return path;
-}
-
-// ============================================================================
-// Function: visualizeMap
-// Purpose : Generates a visual representation of the occupancy grid
-//           using OpenCV. Displays visited cells as white and the
-//           robot’s current location as green. Can be used to animate
-//           exploration or pathfinding in real time.
-//
-// Params  : windowName - title for the OpenCV display window
-// ============================================================================
-void Map::visualizeMap(const std::string &windowName) const
-{
-    int cellSize = 10; // number of pixels representing one map cell
-
-    // Create a blank black image large enough to represent the grid
-    cv::Mat img(rows * cellSize, cols * cellSize, CV_8UC3, cv::Scalar(0, 0, 0));
-
-    // Draw visited/occupied cells as white rectanglesz
-    for (int r = 0; r < rows; ++r)
-    {
-        for (int c = 0; c < cols; ++c)
+        for (int j = 0; j < cols; j++)
         {
-            if (array[r][c] == 1)
+            int x = static_cast<int>(j * baseCellPixelSize * scaleFactor) + offsetX;
+            int y = static_cast<int>(i * baseCellPixelSize * scaleFactor) + offsetY;
+            int size = static_cast<int>(baseCellPixelSize * scaleFactor);
+
+            // 1. Draw the Robot (Green)
+            // Check if the current cell (i, j) is part of the robot's drawn area
+            if (i >= currentRowIdx - robotDrawMargin && i <= currentRowIdx + robotDrawMargin &&
+                j >= currentColIdx - robotDrawMargin && j <= currentColIdx + robotDrawMargin)
             {
-                cv::Rect cellRect(c * cellSize, r * cellSize, cellSize, cellSize);
-                cv::rectangle(img, cellRect, cv::Scalar(255, 255, 255), cv::FILLED);
+                // Draw the robot's full area in green. This now replaces the single-dot drawing.
+                cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(0, 255, 0), cv::FILLED);
+            }
+            // 2. Draw the Target (Red) - Only if it's NOT covered by the robot
+            else if (i == targetRowIdx && j == targetColIdx) 
+            {
+                // Draw the target center (use a slightly larger shape to make it visible)
+                cv::rectangle(finalImage, cv::Rect(x - (size * 0.25), y - (size * 0.25), size * 1.5, size * 1.5), cv::Scalar(0, 0, 255), cv::FILLED);
+            }
+            // 3. Draw Obstacles/Walls (White)
+            else if (array[i][j] == 1)
+            {
+                cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
+            }
+            // 4. Draw Map Borders (White)
+            else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
+            {
+                cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
             }
         }
     }
 
-    // Draw robot's current location as a green square
-    int curR = static_cast<int>(std::round(currentY));
-    int curC = static_cast<int>(std::round(currentX));
-    cv::rectangle(
-        img,
-        cv::Rect(curC * cellSize, curR * cellSize, cellSize, cellSize),
-        cv::Scalar(0, 255, 0), // green color
-        cv::FILLED);
-
-    // Display the image in an OpenCV window
-    cv::imshow(windowName, img);
-    cv::waitKey(1); // short delay to allow refresh; use >0 for pause
+    return finalImage;
 }
