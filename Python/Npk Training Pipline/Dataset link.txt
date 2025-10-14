@@ -1,0 +1,3 @@
+Crop Recommendation Dataset
+
+Dataset Link: https://www.kaggle.com/code/snehamanikanddan/crop-recommendation-system/input?select=Crop_recommendation.csv
