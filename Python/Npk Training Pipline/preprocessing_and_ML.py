@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, learning_curve, cross_val_score 
-# Removed KNeighborsClassifier import
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.svm import SVC
-# from sklearn.neighbors import KNeighborsClassifier # Removed
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier 
@@ -67,7 +65,34 @@ def plot_learning_curve(model, X, y, title, cv=5, n_jobs=-1, train_sizes=np.lins
     plt.tight_layout()
     plt.show()
 
-# --- Model Evaluation Function ---
+# --- NEW: Function to format the individual model table ---
+def create_vgg_style_table(name, train_metrics, test_metrics):
+    """Generates a Markdown table for a single model matching the VGG structure."""
+    
+    metrics_list = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
+    
+    # Create the DataFrame
+    df = pd.DataFrame({
+        f'{name} Training': [train_metrics.get(m, np.nan) for m in metrics_list],
+        f'{name} Testing': [test_metrics.get(m, np.nan) for m in metrics_list]
+    }, index=metrics_list)
+    
+    # Format to 4 decimal places
+    for col in df.columns:
+        df[col] = df[col].map('{:.4f}'.format)
+        
+    # Reset index to make 'Metric' a column
+    df = df.reset_index().rename(columns={'index': 'Metric'})
+    
+    # Print the detailed table
+    print(f"\n--- Detailed Performance Table: {name} ---")
+    print(df.to_markdown(index=False, numalign="left", stralign="left"))
+    print("-" * 60)
+    
+    return df
+# --- End of New Function ---
+
+# --- Model Evaluation Function (MODIFIED to return detailed metrics) ---
 def evaluate_and_report(model, X_train, y_train, X_test, y_test, name, is_scaled=False):
     """Trains, evaluates, and reports metrics for a single model."""
     
@@ -112,6 +137,26 @@ def evaluate_and_report(model, X_train, y_train, X_test, y_test, name, is_scaled
         print("Interpretation: High Bias (Possible Underfitting). Model is too simple or features are insufficient.")
     else:
         print("Interpretation: Balanced Fit. High performance on both sets, suggesting low bias and manageable variance.")
+    
+    # Get detailed classification reports as dictionaries
+    report_train = classification_report(y_train, y_train_pred, zero_division=0, output_dict=True)
+    report_test = classification_report(y_test, y_test_pred, zero_division=0, output_dict=True)
+
+    # Extract Macro Averages (similar to the VGG-style table)
+    train_metrics = {
+        'Accuracy': train_accuracy,
+        'Precision': report_train['macro avg']['precision'],
+        'Recall': report_train['macro avg']['recall'],
+        'F1 Score': report_train['macro avg']['f1-score'],
+    }
+
+    test_metrics = {
+        'Accuracy': test_accuracy,
+        'Precision': report_test['macro avg']['precision'],
+        'Recall': report_test['macro avg']['recall'],
+        'F1 Score': report_test['macro avg']['f1-score'],
+    }
+
 
     print("\nDetailed Training Set Classification Report:")
     print(classification_report(y_train, y_train_pred, zero_division=0))
@@ -132,8 +177,8 @@ def evaluate_and_report(model, X_train, y_train, X_test, y_test, name, is_scaled
         is_scaled=is_scaled 
     )
     
-    # Return the metrics for the history table
-    return model, {
+    # Return the metrics for the history table and the new detailed metrics
+    history_metrics = {
         'Model': name,
         'Train Accuracy': train_accuracy,
         'CV Score': cv_mean_score,
@@ -142,6 +187,8 @@ def evaluate_and_report(model, X_train, y_train, X_test, y_test, name, is_scaled
         'Variance Estimate': variance_estimate,
         'is_scaled': is_scaled # Include scaling status for prediction
     }
+    
+    return model, history_metrics, train_metrics, test_metrics
 
 # --- Configuration ---
 DATA_FILE = r"Python\Npk Training Pipline\Crop_recommendation.csv"
@@ -154,7 +201,10 @@ try:
 except Exception as e:
     print(f"Error loading file: {e}")
     df = pd.DataFrame() 
-    exit()
+    # Use sys.exit() or similar in a real environment, using exit() here for simplicity
+    # In a notebook/script context, if loading fails, further execution is not useful.
+    if df.empty:
+        exit()
 
 # --- 2. Feature Engineering & Selection ---
 print("Applying Feature Engineering (N:K, P:K Ratios, NPK Sum, Moisture Index)...")
@@ -210,8 +260,9 @@ print("\n--- Starting Multi-Model Training and Evaluation ---")
 trained_models = {}
 history_data = [] 
 
+# MODIFIED LOOP: Capture all metrics and print individual tables
 for model_instance, name, is_scaled in models_to_test:
-    trained_model, metrics = evaluate_and_report(
+    trained_model, history_metrics, train_metrics, test_metrics = evaluate_and_report(
         model_instance, 
         X_train, y_train, 
         X_test, y_test, 
@@ -219,12 +270,16 @@ for model_instance, name, is_scaled in models_to_test:
         is_scaled
     )
     trained_models[name] = trained_model
-    history_data.append(metrics) 
+    history_data.append(history_metrics)
+    
+    # NEW: Print the VGG-style table for this model
+    create_vgg_style_table(name, train_metrics, test_metrics) 
+
 
 print("\n--- All models trained and evaluated. ---")
 
-# --- 5. Final Model Comparison (History Table) ---
-print("\n--- Model Performance History Table ---")
+# --- 5. Final Model Comparison (Overall History Table) ---
+print("\n--- Overall Model Performance History Table (Comparison) ---")
 history_df = pd.DataFrame(history_data)
 for col in ['Train Accuracy', 'CV Score', 'Test Accuracy']:
     history_df[col] = history_df[col].map('{:.4f}'.format)
