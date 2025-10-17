@@ -1,0 +1,22 @@
+-------------------------DeepSort refrence code-----------------------------
+
+Implementation is taken from:
+https://github.com/zhahoi/yolov11_deepsort_ncnn/tree/main
+
+The model type was analyzed and changed by Youssef Mohamed Amer and
+a wrapper class is made to abstract the interfacing with it additionally
+a conversion script that simplifies the process is included to convert
+the models from python to C++ expected format.
+
+-----------------------END DeepSort refrence code---------------------------
+
+---------------------------Yolo refrence code-------------------------------
+
+Youssef Mohamed Amer but followed steps provided by: 
+https://github.com/ultralytics/ultralytics/tree/main
+
+for preprocessing, post processing and input shapes for yolo model to C++
+the same way the framework handled it in python. in addition a conversion
+script is included to convert the model from python to C++ expected format.
+
+--------------------------END Yolo refrence code----------------------------
