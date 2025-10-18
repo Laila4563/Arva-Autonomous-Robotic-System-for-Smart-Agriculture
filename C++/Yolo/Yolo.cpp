@@ -219,13 +219,13 @@ void Yolo::view(const cv::Mat& frame, const std::vector<Object>& dets)
 }
 void Yolo::exportPic(const cv::Mat& frame, const std::vector<Object>& dets, const std::string& filename)
 {
-    // Text style (same as your original)
+    
     const int fontFace = cv::FONT_HERSHEY_SIMPLEX;
     const double fontScale = 0.6;
     const int thickness = 2;
-    const int margin = 5; // small breathing room
+    const int margin = 5; 
 
-    // compute required padding so annotations don't get clipped
+   
     int need_top = 0, need_bottom = 0, need_left = 0, need_right = 0;
     for (const auto& d : dets) {
         const std::string label = this->class_names[d.label] + " " + cv::format("%.2f", d.prob);
@@ -245,7 +245,7 @@ void Yolo::exportPic(const cv::Mat& frame, const std::vector<Object>& dets, cons
         if (bottomY > frame.rows) need_bottom = std::max(need_bottom, bottomY - frame.rows + margin);
     }
 
-    // create canvas with borders if needed
+    
     cv::Mat vis;
     if (need_top || need_bottom || need_left || need_right) {
         cv::copyMakeBorder(frame, vis, need_top, need_bottom, need_left, need_right,
@@ -255,7 +255,7 @@ void Yolo::exportPic(const cv::Mat& frame, const std::vector<Object>& dets, cons
         vis = frame.clone();
     }
 
-    // draw shifted boxes and labels
+    
     for (const auto& d : dets) {
         cv::Rect r(
             int(d.rect.x) + need_left,
@@ -269,11 +269,11 @@ void Yolo::exportPic(const cv::Mat& frame, const std::vector<Object>& dets, cons
         int baseline = 0;
         cv::Size textSize = cv::getTextSize(label, fontFace, fontScale, thickness, &baseline);
 
-        // preferred label position: above the box
+      
         int text_x = r.x;
         int text_y = r.y - margin;
 
-        // if even after padding the label would be outside, place below the box
+     
         if (text_y - textSize.height < 0) {
             text_y = r.y + r.height + textSize.height + margin;
         }
