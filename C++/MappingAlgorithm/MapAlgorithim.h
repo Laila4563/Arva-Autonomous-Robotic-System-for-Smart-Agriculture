@@ -16,43 +16,32 @@
 #endif
 using json = nlohmann::json;
 
-class Map
-{
+class Map {
 public:
-    enum class Direction
-    {
-        Left,
-        Right,
-        Top,
-        Bottom,
-        Done
-    };
-
+    enum class Direction { Left, Right, Top, Bottom, Done };
 private:
-    int **array;
-    char **dirMap;
+
+    int** array;
+    char** dirMap;
     int rows, cols;
     int originRow, originCol;
-    float currentX, currentY, targetX = -1, targetY = -1;
+    float currentX, currentY,targetX=-1,targetY=-1;
     float lastAngle = 90.0f;
     int prealloc_cm = 0;
-
-    float robotLengthCm;
-    float robotWidthCm;
-    float marginCells;
 
     static constexpr int precision = 4;
     std::function<void()> onUpdate = nullptr;
     std::function<void(int)> onContinousHandler = nullptr;
     std::function<void(int, float)> onChangeHandler = nullptr;
 
-    int **allocateArray(int newRows, int newCols);
-    char **allocateDirArray(int newRows, int newCols);
+    int** allocateArray(int newRows, int newCols);
+    char** allocateDirArray(int newRows, int newCols);
     void ensureFit(int newRow, int newCol);
     void internalUpdate(float cm, float angle);
-
+    
 public:
-    Map(float lengthCM, float widthCM);
+
+    Map();
 
     ~Map();
     void setOnUpdate(std::function<void()> handler);
@@ -73,3 +62,4 @@ public:
     json mapAsJson();
     cv::Mat generatePicture();
 };
+
