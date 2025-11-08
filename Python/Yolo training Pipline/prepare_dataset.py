@@ -79,7 +79,7 @@ def prepare_structure():
         (OUT_LABELS / split).mkdir(parents=True, exist_ok=True)
 
 
-def copy_split(mapping, frac_val=0.15, frac_test=0.10):
+def copy_split(mapping, frac_val=0.10, frac_test=0.10):
     imgs = list(mapping.items())
     img_paths = [i for i, _ in imgs]
     train_and_val, test = train_test_split(img_paths, test_size=frac_test, random_state=RANDOM_STATE)
