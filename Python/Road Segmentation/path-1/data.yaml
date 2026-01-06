@@ -1,0 +1,12 @@
+names:
+- row
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: path-oj7sc
+  url: https://universe.roboflow.com/tps-klzw4/path-oj7sc/dataset/1
+  version: 1
+  workspace: tps-klzw4
+test: ../test/images
+train: path-1/train/images
+val: path-1/valid/images

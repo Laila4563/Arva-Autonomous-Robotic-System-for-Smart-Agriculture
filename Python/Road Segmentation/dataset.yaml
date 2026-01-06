@@ -1,0 +1,8 @@
+names:
+- path
+nc: 1
+path: /Users/sc/Desktop/GP/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/Python/Road
+  Segmentation/path-1
+test: test/images
+train: train/images
+val: valid/images
