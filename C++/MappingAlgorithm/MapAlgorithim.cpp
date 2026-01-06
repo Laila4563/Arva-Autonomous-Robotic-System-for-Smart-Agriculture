@@ -1,490 +1,1009 @@
 #include "MapAlgorithim.h"
+#include <mutex>
+#include <deque>
+
+// --------------------- Implementation --------------------------
 
 int** Map::allocateArray(int newRows, int newCols) {
-    int** newArray = new int* [newRows];
-    for (int i = 0; i < newRows; ++i)
-        newArray[i] = new int[newCols]();
-    return newArray;
+	int** newArray = new int* [newRows];
+	for (int i = 0; i < newRows; ++i)
+		newArray[i] = new int[newCols]();
+	return newArray;
 }
 
 char** Map::allocateDirArray(int newRows, int newCols)
 {
-    char** newDirMap = new char* [newRows];
-    for (int i = 0; i < newRows; ++i) {
-        newDirMap[i] = new char[newCols];
-        std::memset(newDirMap[i], ' ', newCols);
-    }
-    return newDirMap;
+	char** newDirMap = new char* [newRows];
+	for (int i = 0; i < newRows; ++i) {
+		newDirMap[i] = new char[newCols];
+		std::memset(newDirMap[i], ' ', newCols);
+	}
+	return newDirMap;
+}
+
+unsigned char** Map::allocateTempVisitedArray(int newRows, int newCols)
+{
+	unsigned char** arr = new unsigned char* [newRows];
+	for (int i = 0; i < newRows; ++i) {
+		arr[i] = new unsigned char[newCols]();
+	}
+	return arr;
+}
+
+void Map::freeTempVisitedArray(unsigned char** arr, int r)
+{
+	if (!arr) return;
+	for (int i = 0; i < r; ++i)
+		delete[] arr[i];
+	delete[] arr;
 }
 
 void Map::ensureFit(int newRow, int newCol)
 {
-    int padTop = 0, padBottom = 0, padLeft = 0, padRight = 0;
+	int padTop = 0, padBottom = 0, padLeft = 0, padRight = 0;
 
-    if (newRow < 0)
-        padTop = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newRow) : -newRow;
-    if (newRow >= rows)
-        padBottom = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newRow - rows + 1) : newRow - rows + 1;
-    if (newCol < 0)
-        padLeft = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newCol) : -newCol;
-    if (newCol >= cols)
-        padRight = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newCol - cols + 1) : newCol - cols + 1;
+	if (newRow < 0)
+		padTop = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newRow) : -newRow;
+	if (newRow >= rows)
+		padBottom = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newRow - rows + 1) : newRow - rows + 1;
+	if (newCol < 0)
+		padLeft = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newCol) : -newCol;
+	if (newCol >= cols)
+		padRight = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newCol - cols + 1) : newCol - cols + 1;
 
-    if (padTop == 0 && padBottom == 0 && padLeft == 0 && padRight == 0)
-        return;
+	if (padTop == 0 && padBottom == 0 && padLeft == 0 && padRight == 0)
+		return;
 
-    int newRows = rows + padTop + padBottom;
-    int newCols = cols + padLeft + padRight;
-    int** newArray = allocateArray(newRows, newCols);
-    char** newDirMap = allocateDirArray(newRows, newCols);
+	int newRows = rows + padTop + padBottom;
+	int newCols = cols + padLeft + padRight;
+	int** newArray = allocateArray(newRows, newCols);
+	char** newDirMap = allocateDirArray(newRows, newCols);
+	unsigned char** newTempVisited = allocateTempVisitedArray(newRows, newCols);
 
-    for (int i = 0; i < rows; ++i) {
-        std::memcpy(newArray[i + padTop] + padLeft, array[i], cols * sizeof(int));
-        std::memcpy(newDirMap[i + padTop] + padLeft, dirMap[i], cols * sizeof(char));
-    }
+	for (int i = 0; i < rows; ++i) {
+		std::memcpy(newArray[i + padTop] + padLeft, array[i], cols * sizeof(int));
+		std::memcpy(newDirMap[i + padTop] + padLeft, dirMap[i], cols * sizeof(char));
+		if (tempVisited)
+			std::memcpy(newTempVisited[i + padTop] + padLeft, tempVisited[i], cols * sizeof(unsigned char));
 
-    for (int i = 0; i < rows; ++i) {
-        delete[] array[i];
-        delete[] dirMap[i];
-    }
-    delete[] array;
-    delete[] dirMap;
+	}
+	freeTempVisitedArray(tempVisited, rows);
 
-    array = newArray;
-    dirMap = newDirMap;
+	for (int i = 0; i < rows; ++i) {
+		delete[] array[i];
+		delete[] dirMap[i];
+	}
+	delete[] array;
+	delete[] dirMap;
 
-    originRow += padTop;
-    originCol += padLeft;
-    currentY += padTop;
-    currentX += padLeft;
-    rows = newRows;
-    cols = newCols;
+	array = newArray;
+	dirMap = newDirMap;
+	tempVisited = newTempVisited;
+
+	originRow += padTop;
+	originCol += padLeft;
+	currentY += padTop;
+	currentX += padLeft;
+	rows = newRows;
+	cols = newCols;
 }
 
 void Map::internalUpdate(float cm, float angle)
 {
-    float angleRad = angle * M_PI / 180.0f;
-    float dx = std::cos(angleRad);
-    float dy = -std::sin(angleRad);
+	// angle in degrees. Movement logic unchanged from your original implementation.
+	float angleRad = angle * M_PI / 180.0f;
+	float dx = std::cos(angleRad);
+	float dy = -std::sin(angleRad);
 
-    char directionChar = (std::abs(dx) > std::abs(dy)) ? 'H' : 'V';
+	char directionChar = (std::abs(dx) > std::abs(dy)) ? 'H' : 'V';
 
-    int subdivisions = std::max(2, static_cast<int>(std::ceil(cm / (precision / 2.0f))));
-    float subDistance_cm = cm / subdivisions;
-    float cellStep = subDistance_cm / precision;
+	int subdivisions = std::max(2, static_cast<int>(std::ceil(cm / (precision / 2.0f))));
+	float subDistance_cm = cm / subdivisions;
+	float cellStep = subDistance_cm / precision; // because precision == cm per cell
 
-    for (int i = 0; i < subdivisions; ++i) {
-        currentX += dx * cellStep;
-        currentY += dy * cellStep;
-        int mapX = std::round(currentX);
-        int mapY = std::round(currentY);
+	for (int i = 0; i < subdivisions; ++i) {
+		currentX += dx * cellStep;
+		currentY += dy * cellStep;
+		int mapX = std::round(currentX);
+		int mapY = std::round(currentY);
 
-        ensureFit(mapY, mapX);
+		ensureFit(mapY, mapX);
 
-        mapX = std::round(currentX);
-        mapY = std::round(currentY);
+		mapX = std::round(currentX);
+		mapY = std::round(currentY);
+		markRecentCell(mapY, mapX);
 
-       
-        dirMap[mapY][mapX] = directionChar;
-    }
+		dirMap[mapY][mapX] = directionChar;
+	}
 }
 
 Map::Map() : rows(1), cols(1), originRow(0), originCol(0), currentX(0), currentY(0) {
-    array = allocateArray(rows, cols);
-    dirMap = allocateDirArray(rows, cols);
-    array[originRow][originCol] = 0;
-    dirMap[originRow][originCol] = 'S';
+	array = allocateArray(rows, cols);
+	dirMap = allocateDirArray(rows, cols);
+	tempVisited = allocateTempVisitedArray(rows, cols);
+	array[originRow][originCol] = static_cast<int>(Entities::freeDistance);
+	dirMap[originRow][originCol] = 'S';
 }
 
 Map::~Map()
 {
-    for (int i = 0; i < rows; ++i) {
-        delete[] array[i];
-        delete[] dirMap[i];
-    }
-    delete[] array;
-    delete[] dirMap;
+	for (int i = 0; i < rows; ++i) {
+		delete[] array[i];
+		delete[] dirMap[i];
+	}
+	delete[] array;
+	delete[] dirMap;
+	freeTempVisitedArray(tempVisited, rows);
+
 }
 
 void Map::setOnUpdate(std::function<void()> handler)
 {
-    onUpdate = std::move(handler);
+	onUpdate = std::move(handler);
 }
 
 void Map::setOnContinous(std::function<void(int)> handler)
 {
-    onContinousHandler = std::move(handler);
+	onContinousHandler = std::move(handler);
 }
 
 void Map::setOnChange(std::function<void(int, float)> handler)
 {
-    onChangeHandler = std::move(handler);
+	onChangeHandler = std::move(handler);
 }
 
-void Map::update(float cm)
+// New API implementations
+
+void Map::moved(int cm)
 {
-    internalUpdate(cm, lastAngle);
-    if (onUpdate) {
-        onUpdate();
-    }
+	std::lock_guard<std::mutex> lock(mapMutex);
+
+	// Notify continuous movement (if any)
+	if (onContinousHandler) {
+		onContinousHandler(cm);
+	}
+
+	// Perform movement at the current heading
+	internalUpdate(static_cast<float>(cm), lastAngle);
+
+	// Fire general update
+	if (onUpdate) {
+		onUpdate();
+	}
 }
 
-void Map::update(float cm, float angle)
+void Map::turn(double angle)
 {
-    float newEffectiveAngle = lastAngle + angle;
-    internalUpdate(cm, newEffectiveAngle);
-    lastAngle = newEffectiveAngle;
-    if (onUpdate) {
-        onUpdate();
-    }
-}
+	std::lock_guard<std::mutex> lock(mapMutex);
 
-void Map::update(float cm, float angle, int estimated_prealloc_cm)
-{
-    prealloc_cm = estimated_prealloc_cm;
-    float newEffectiveAngle = lastAngle + angle;
-    internalUpdate(cm, newEffectiveAngle);
-    lastAngle = newEffectiveAngle;
-    if (onUpdate) {
-        onUpdate();
-    }
-}
+	// Compute angles and notify change
+	float prevAngleSnap = snapToNearestRightAngle(lastAngle);
+	float newAngle = lastAngle + static_cast<float>(angle);
+	float newAngleSnap = snapToNearestRightAngle(newAngle);
 
-void Map::updateAngle(float angle)
-{
-    float newEffectiveAngle = lastAngle + angle;
-    lastAngle = newEffectiveAngle;
-    if (onUpdate) {
-        onUpdate();
-    }
-}
+	float relativeAngle = calculateRelativeAngle(prevAngleSnap, newAngleSnap);
 
-void Map::print() const
-{
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            if (i == currentY && j == currentX)
-                std::cout << "2";
-            else
-                if (array[i][j] == 1)
-                    std::cout << "1";
-                else
-                    std::cout << " ";
-        }
-        std::cout << '\n';
-    }
-}
+	if (onChangeHandler) {
+		onChangeHandler(precision, relativeAngle);
+	}
 
-void Map::printValues() const
-{
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j)
-            std::cout << array[i][j] << " ";
-        std::cout << '\n';
-    }
-}
-
-void Map::setTargetLocation(float x, float y)
-{
-    targetX = x; targetY = y;
-}
-
-float Map::snapToNearestRightAngle(float angle)
-{
-    angle = fmod(angle, 360.0f);
-    if (angle < 0) angle += 360.0f;
-
-    float options[] = { 0.0f, 90.0f, 180.0f, 270.0f };
-
-    float closest = options[0];
-    float minDiff = std::abs(angle - closest);
-    for (int i = 1; i < 4; ++i) {
-        float diff = std::abs(angle - options[i]);
-        if (diff < minDiff) {
-            minDiff = diff;
-            closest = options[i];
-        }
-    }
-
-    return closest;
-}
-
-Map::Direction Map::nextMove() 
-{
-    if (targetY == -1 || targetX == -1)
-    {
-        return Direction::Done;
-    }
-
-    int curCol = static_cast<int>(std::round(currentX));
-    int curRow = static_cast<int>(std::round(currentY));
-    int tgtCol = static_cast<int>(std::round(targetX));
-    int tgtRow = static_cast<int>(std::round(targetY));
-
-
-    const float doneThreshold = 0.5f;
-    if (std::hypot(targetX - currentX, targetY - currentY) <= doneThreshold) {
-        return Direction::Done;
-    }
-
-
-    int dx = tgtCol - curCol;
-    int dy = tgtRow - curRow;
-
-
-    auto isFree = [&](int r, int c) -> bool {
-        if (r < 0 || r >= rows || c < 0 || c >= cols) {
-
-            return true;
-        }
-        return array[r][c] == 0;
-        };
-
-    auto manhattan = [&](int r, int c) -> int {
-        return std::abs(tgtRow - r) + std::abs(tgtCol - c);
-        };
-
-
-    std::vector<std::pair<Direction, std::pair<int, int>>> candidates;
-    bool preferX = (std::abs(dx) >= std::abs(dy));
-
-
-    auto pushCandidate = [&](Direction dir, int r, int c) {
-        candidates.emplace_back(dir, std::make_pair(r, c));
-        };
-
-    if (preferX) {
-        if (dx > 0) pushCandidate(Direction::Right, curRow, curCol + 1);
-        else if (dx < 0) pushCandidate(Direction::Left, curRow, curCol - 1);
-
-        if (dy > 0) pushCandidate(Direction::Bottom, curRow + 1, curCol);
-        else if (dy < 0) pushCandidate(Direction::Top, curRow - 1, curCol);
-    }
-    else {
-        if (dy > 0) pushCandidate(Direction::Bottom, curRow + 1, curCol);
-        else if (dy < 0) pushCandidate(Direction::Top, curRow - 1, curCol);
-
-        if (dx > 0) pushCandidate(Direction::Right, curRow, curCol + 1);
-        else if (dx < 0) pushCandidate(Direction::Left, curRow, curCol - 1);
-    }
-
-
-    pushCandidate(Direction::Top, curRow - 1, curCol);
-    pushCandidate(Direction::Bottom, curRow + 1, curCol);
-    pushCandidate(Direction::Left, curRow, curCol - 1);
-    pushCandidate(Direction::Right, curRow, curCol + 1);
-
-
-    std::vector<std::pair<Direction, std::pair<int, int>>> uniqueCandidates;
-    for (auto& p : candidates) {
-        bool seen = false;
-        for (auto& q : uniqueCandidates) {
-            if (q.first == p.first) { seen = true; break; }
-        }
-        if (!seen) uniqueCandidates.push_back(p);
-    }
-
-
-    int currentDist = manhattan(curRow, curCol);
-    for (auto& c : uniqueCandidates) {
-        int nr = c.second.first;
-        int nc = c.second.second;
-        if (!isFree(nr, nc)) continue;
-        int newDist = manhattan(nr, nc);
-        if (newDist < currentDist) {
-            return c.first;
-        }
-    }
-
-    for (auto& c : uniqueCandidates) {
-        int nr = c.second.first;
-        int nc = c.second.second;
-        if (isFree(nr, nc)) {
-            return c.first;
-        }
-    }
-
-    targetX = -1; targetY = -1;
-    return Direction::Done;
-}
-    
-
-float Map::normalizeAngle(float angle)
-{
-    while (angle < 0) angle += 360;
-    while (angle >= 360) angle -= 360;
-    return angle;
-}
-
-float Map::calculateRelativeAngle(float prevAngle, float currentAngle)
-{
-    float angleDiff = currentAngle - prevAngle;
-    angleDiff = normalizeAngle(angleDiff);
-
-    if (angleDiff > 180) {
-        angleDiff -= 360;
-    }
-    return angleDiff;
+	lastAngle = newAngle; // update heading (keeps fractional angles)
+	if (onUpdate) {
+		onUpdate();
+	}
 }
 
 void Map::apply(Direction movement)
 {
-    float prevAngle = snapToNearestRightAngle(lastAngle);
-    float currentAngle = 0;
-    switch (movement) {
-    case Direction::Top:
-    {
-        currentAngle = 90;
-    }
-    break;
-    case Direction::Left:
-    {
-        currentAngle = 180;
-    }
-    break;
-    case Direction::Bottom:
-    {
-        currentAngle = 270;
-    }
-    break;
-    case Direction::Right:
-    {
-        currentAngle = 0;
-    }
-    break;
-    default:
-        return;
-    }
-    float relativeAngle = calculateRelativeAngle(prevAngle, currentAngle);
-    if (prevAngle == currentAngle)
-    {
-        if (onContinousHandler) {
-            onContinousHandler(precision);
-        }
-        update(precision);
-    }
-    else
-    {
-        if (onChangeHandler) {
-            onChangeHandler(precision, relativeAngle);
-        }
-        update(precision, relativeAngle);
-    }
+	std::lock_guard<std::mutex> lock(mapMutex);
 
+	float prevAngle = snapToNearestRightAngle(lastAngle);
+	float currentAngle = 0;
+	switch (movement) {
+	case Direction::Top:
+		currentAngle = 90;
+		break;
+	case Direction::Left:
+		currentAngle = 180;
+		break;
+	case Direction::Bottom:
+		currentAngle = 270;
+		break;
+	case Direction::Right:
+		currentAngle = 0;
+		break;
+	default:
+		return;
+	}
+
+	float relativeAngle = calculateRelativeAngle(prevAngle, currentAngle);
+
+	if (prevAngle == currentAngle)
+	{
+		if (onContinousHandler) {
+			onContinousHandler(precision);
+		}
+		// move forward precision cm
+		moved(precision);
+	}
+	else
+	{
+		if (onChangeHandler) {
+			onChangeHandler(precision, relativeAngle);
+		}
+		// rotate then move forward precision cm (keeps same behavior as before)
+		turn(relativeAngle);
+		moved(precision);
+	}
 }
+
+void Map::add(Entities entity, int distanceCm)
+{
+	std::lock_guard<std::mutex> lock(mapMutex);
+
+	// place entity at distanceCm in front of current position
+	float angleRad = lastAngle * M_PI / 180.0f;
+	float dx = std::cos(angleRad);
+	float dy = -std::sin(angleRad);
+
+	// convert cm to grid cells (1 cell == precision cm)
+	float cellsAheadF = static_cast<float>(distanceCm) / static_cast<float>(precision);
+	int cellsAhead = static_cast<int>(std::round(cellsAheadF));
+
+	// compute target coords using current position (these are in grid cell units)
+	float targetXf = currentX + dx * static_cast<float>(cellsAhead);
+	float targetYf = currentY + dy * static_cast<float>(cellsAhead);
+
+	int mapX = static_cast<int>(std::round(targetXf));
+	int mapY = static_cast<int>(std::round(targetYf));
+
+	// Ensure we have room for the target cell. This may reallocate and shift
+	// currentX/currentY/origin, so we MUST recompute indices afterwards.
+	ensureFit(mapY, mapX);
+
+	// Recompute target indices because ensureFit may have shifted currentX/currentY.
+	// (Important: use the same dx/dy/cellsAhead so recomputed indices match post-shift grid)
+	targetXf = currentX + dx * static_cast<float>(cellsAhead);
+	targetYf = currentY + dy * static_cast<float>(cellsAhead);
+
+	mapX = static_cast<int>(std::round(targetXf));
+	mapY = static_cast<int>(std::round(targetYf));
+
+	// Defensive check: if we're still out of bounds for some reason, expand again
+	if (mapY < 0 || mapY >= rows || mapX < 0 || mapX >= cols) {
+		ensureFit(mapY, mapX);
+		// recompute once more (should now be inside)
+		targetXf = currentX + dx * static_cast<float>(cellsAhead);
+		targetYf = currentY + dy * static_cast<float>(cellsAhead);
+		mapX = static_cast<int>(std::round(targetXf));
+		mapY = static_cast<int>(std::round(targetYf));
+	}
+
+	// Final safety: validate pointers / ranges before writing
+	if (array == nullptr || dirMap == nullptr) {
+		std::cerr << "Map::add - ERROR: array or dirMap is null\n";
+		return;
+	}
+	if (mapY < 0 || mapY >= rows || mapX < 0 || mapX >= cols) {
+		std::cerr << "Map::add - ERROR: indices still out of range after ensureFit: "
+			<< "mapY=" << mapY << " rows=" << rows << " mapX=" << mapX << " cols=" << cols << '\n';
+		return;
+	}
+
+	// store the entity value into the occupancy array
+	array[mapY][mapX] = static_cast<int>(entity);
+
+	// update dirMap for quick visualization if useful
+	if (entity == Entities::Obstacle || entity == Entities::Plant) {
+		// inflate in place (this uses robotRadiusCells)
+		inflateObstaclesForRobotSize();
+	}
+
+	// update dirMap for quick visualization if useful
+	if (entity == Entities::Obstacle) dirMap[mapY][mapX] = 'X';
+	else if (entity == Entities::Plant) dirMap[mapY][mapX] = 'P'; 
+	else dirMap[mapY][mapX] = ' ';
+}
+
+void Map::print() const
+{
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			if (i == static_cast<int>(std::round(currentY)) && j == static_cast<int>(std::round(currentX)))
+				std::cout << "2";
+			else if (array[i][j] == static_cast<int>(Entities::Obstacle))
+				std::cout << "1";
+			else
+				std::cout << " ";
+		}
+		std::cout << '\n';
+	}
+}
+
+void Map::printValues() const
+{
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j)
+			std::cout << array[i][j] << " ";
+		std::cout << '\n';
+	}
+}
+
+void Map::setTargetLocation(float x, float y)
+{
+	std::lock_guard<std::mutex> lock(mapMutex);
+
+	targetX = x; targetY = y;
+}
+
+float Map::snapToNearestRightAngle(float angle)
+{
+	angle = fmod(angle, 360.0f);
+	if (angle < 0) angle += 360.0f;
+
+	float options[] = { 0.0f, 90.0f, 180.0f, 270.0f };
+
+	float closest = options[0];
+	float minDiff = std::abs(angle - closest);
+	for (int i = 1; i < 4; ++i) {
+		float diff = std::abs(angle - options[i]);
+		if (diff < minDiff) {
+			minDiff = diff;
+			closest = options[i];
+		}
+	}
+
+	return closest;
+}
+
+Map::Direction Map::nextMove()
+{
+	std::lock_guard<std::mutex> lock(mapMutex);
+
+	if (targetY == -1 || targetX == -1)
+	{
+		return Direction::Done;
+	}
+
+	int curCol = static_cast<int>(std::round(currentX));
+	int curRow = static_cast<int>(std::round(currentY));
+	int tgtCol = static_cast<int>(std::round(targetX));
+	int tgtRow = static_cast<int>(std::round(targetY));
+
+
+	const float doneThreshold = 0.5f;
+	if (std::hypot(targetX - currentX, targetY - currentY) <= doneThreshold) {
+		return Direction::Done;
+	}
+
+
+	int dx = tgtCol - curCol;
+	int dy = tgtRow - curRow;
+
+
+	auto isFree = [&](int r, int c) -> bool {
+		if (r < 0 || r >= rows || c < 0 || c >= cols) {
+			return true;
+		}
+		return array[r][c] == static_cast<int>(Entities::freeDistance);
+	};
+
+	auto manhattan = [&](int r, int c) -> int {
+		return std::abs(tgtRow - r) + std::abs(tgtCol - c);
+	};
+
+
+	std::vector<std::pair<Direction, std::pair<int, int>>> candidates;
+	bool preferX = (std::abs(dx) >= std::abs(dy));
+
+
+	auto pushCandidate = [&](Direction dir, int r, int c) {
+		candidates.emplace_back(dir, std::make_pair(r, c));
+	};
+
+	if (preferX) {
+		if (dx > 0) pushCandidate(Direction::Right, curRow, curCol + 1);
+		else if (dx < 0) pushCandidate(Direction::Left, curRow, curCol - 1);
+
+		if (dy > 0) pushCandidate(Direction::Bottom, curRow + 1, curCol);
+		else if (dy < 0) pushCandidate(Direction::Top, curRow - 1, curCol);
+	}
+	else {
+		if (dy > 0) pushCandidate(Direction::Bottom, curRow + 1, curCol);
+		else if (dy < 0) pushCandidate(Direction::Top, curRow - 1, curCol);
+
+		if (dx > 0) pushCandidate(Direction::Right, curRow, curCol + 1);
+		else if (dx < 0) pushCandidate(Direction::Left, curRow, curCol - 1);
+	}
+
+
+	pushCandidate(Direction::Top, curRow - 1, curCol);
+	pushCandidate(Direction::Bottom, curRow + 1, curCol);
+	pushCandidate(Direction::Left, curRow, curCol - 1);
+	pushCandidate(Direction::Right, curRow, curCol + 1);
+
+
+	std::vector<std::pair<Direction, std::pair<int, int>>> uniqueCandidates;
+	for (auto& p : candidates) {
+		bool seen = false;
+		for (auto& q : uniqueCandidates) {
+			if (q.first == p.first) { seen = true; break; }
+		}
+		if (!seen) uniqueCandidates.push_back(p);
+	}
+
+
+	int currentDist = manhattan(curRow, curCol);
+	for (auto& c : uniqueCandidates) {
+		int nr = c.second.first;
+		int nc = c.second.second;
+		if (!isFree(nr, nc)) continue;
+		int newDist = manhattan(nr, nc);
+		if (newDist < currentDist) {
+			return c.first;
+		}
+	}
+
+	for (auto& c : uniqueCandidates) {
+		int nr = c.second.first;
+		int nc = c.second.second;
+		if (isFree(nr, nc)) {
+			return c.first;
+		}
+	}
+
+	targetX = -1; targetY = -1;
+	return Direction::Done;
+}
+
+
+float Map::normalizeAngle(float angle)
+{
+	while (angle < 0) angle += 360;
+	while (angle >= 360) angle -= 360;
+	return angle;
+}
+
+float Map::calculateRelativeAngle(float prevAngle, float currentAngle)
+{
+	float angleDiff = currentAngle - prevAngle;
+	angleDiff = normalizeAngle(angleDiff);
+
+	if (angleDiff > 180) {
+		angleDiff -= 360;
+	}
+	return angleDiff;
+}
+
+
+
+
+Map::Motion Map::NextMove()
+{
+	Motion out{ 0, 0.0, false, false, false };
+
+	// No target set -> done but not necessarily "unreachable"
+	if (targetX == -1 || targetY == -1) {
+		out.done = true;
+		out.unreachable = false;
+		out.hasAngle = false;
+		return out;
+	}
+
+	// vector to target in grid-cells
+	float dxCells = targetX - currentX;
+	float dyCells = targetY - currentY;
+
+	const float doneThreshold = 0.5f; // cells
+	if (std::hypot(dxCells, dyCells) <= doneThreshold) {
+		// Reached target -> mark done
+		out.done = true;
+		out.unreachable = false;
+		out.hasAngle = false;
+		out.distance = 0;
+		out.angle = 0.0;
+		return out;
+	}
+
+	auto cellIsFree = [&](int r, int c) -> bool {
+		if (r < 0 || r >= rows || c < 0 || c >= cols) return false;
+		int v = array[r][c];
+		return (v == static_cast<int>(Entities::freeDistance) || v == static_cast<int>(Entities::currentLocation));
+		};
+
+	auto cellIsBlocked = [&](int r, int c) -> bool {
+		if (r < 0 || r >= rows || c < 0 || c >= cols) return true;
+		int v = array[r][c];
+		return (v == static_cast<int>(Entities::Obstacle) || v == static_cast<int>(Entities::Plant));
+		};
+
+	auto finalize = [&](int distCm, double angleDeg, bool doneFlag, bool unreachableFlag) -> Map::Motion {
+		Map::Motion m;
+		m.distance = distCm;
+		m.angle = angleDeg;
+		m.done = doneFlag;
+		m.unreachable = unreachableFlag;
+		m.hasAngle = (std::abs(angleDeg) > 1e-3);
+		return m;
+		};
+
+	int curCol = static_cast<int>(std::round(currentX));
+	int curRow = static_cast<int>(std::round(currentY));
+	int tgtCol = static_cast<int>(std::round(targetX));
+	int tgtRow = static_cast<int>(std::round(targetY));
+
+	// If target cell itself is blocked -> explicitly unreachable (do NOT return done=true)
+	if (tgtRow < 0 || tgtRow >= rows || tgtCol < 0 || tgtCol >= cols || cellIsBlocked(tgtRow, tgtCol)) {
+		return finalize(0, 0.0, false, true);
+	}
+
+	// 1) Try direct straight-line motion (line-of-sight) from current to target.
+	{
+		const int samples = std::max(2, static_cast<int>(std::ceil(std::max(std::abs(dxCells), std::abs(dyCells)) * 2.0f)));
+		bool blocked = false;
+		int maxSafeSample = samples;
+
+		for (int i = 1; i <= samples; ++i) {
+			float t = static_cast<float>(i) / static_cast<float>(samples);
+			float sx = currentX + dxCells * t;
+			float sy = currentY + dyCells * t;
+			int rr = static_cast<int>(std::round(sy));
+			int cc = static_cast<int>(std::round(sx));
+
+			if (cellIsBlocked(rr, cc) || isImmediateBacktrack(rr, cc)) {
+				blocked = true;
+				maxSafeSample = i - 1;
+				break;
+			}
+		}
+
+		if (!blocked) {
+			// line fully free -> go straight to target
+			float distCells = std::hypot(dxCells, dyCells);
+			int distCm = static_cast<int>(std::round(distCells * precision));
+			double angleToTargetDeg = std::atan2(-dyCells, dxCells) * 180.0 / M_PI;
+			double relative = calculateRelativeAngle(lastAngle, static_cast<float>(angleToTargetDeg));
+			return finalize(distCm, relative, false, false);
+		}
+		else if (maxSafeSample > 0) {
+			// move to farthest free sample point (stops before any plant/obstacle)
+			float t = static_cast<float>(maxSafeSample) / static_cast<float>(samples);
+			float sx = currentX + dxCells * t;
+			float sy = currentY + dyCells * t;
+			float distCells = std::hypot(sx - currentX, sy - currentY);
+			int distCm = static_cast<int>(std::round(distCells * precision));
+			double angleToTargetDeg = std::atan2(-dyCells, dxCells) * 180.0 / M_PI;
+			double relative = calculateRelativeAngle(lastAngle, static_cast<float>(angleToTargetDeg));
+			if (distCm > 0) {
+				return finalize(distCm, relative, false, false);
+			}
+			// else fallthrough to pathfinding/avoidance
+		}
+	}
+
+	// A* helper that returns a path (vector of {row,col}) if found
+	auto runAStar = [&](int startR, int startC, int goalR, int goalC, std::vector<std::pair<int, int>>& outPath, int maxNodesToExplore = -1) -> bool {
+		outPath.clear();
+		if (startR < 0 || startR >= rows || startC < 0 || startC >= cols) return false;
+		if (goalR < 0 || goalR >= rows || goalC < 0 || goalC >= cols) return false;
+		if (cellIsBlocked(startR, startC) || cellIsBlocked(goalR, goalC)) return false;
+
+		const int totalCells = rows * cols;
+		auto idx = [&](int r, int c) { return r * cols + c; };
+
+		const float INF_F = std::numeric_limits<float>::infinity();
+		std::vector<float> gScore(totalCells, INF_F);
+		std::vector<int> parent(totalCells, -1);
+		std::vector<char> closed(totalCells, 0);
+
+		struct Node { float f; int r; int c; };
+		struct Cmp {
+			bool operator()(Node const& a, Node const& b) const { return a.f > b.f; }
+		};
+		std::priority_queue<Node, std::vector<Node>, Cmp> open;
+
+		auto heuristic = [&](int r, int c) -> float {
+			return static_cast<float>(std::abs(r - goalR) + std::abs(c - goalC));
+			};
+
+		int startIdx = idx(startR, startC);
+		gScore[startIdx] = 0.0f;
+		parent[startIdx] = startIdx;
+		open.push({ heuristic(startR, startC), startR, startC });
+
+		int nodesSearched = 0;
+		const int maxNodes = (maxNodesToExplore <= 0) ? totalCells : std::min(totalCells, maxNodesToExplore);
+
+		const int drs[4] = { -1, 1, 0, 0 };
+		const int dcs[4] = { 0, 0, -1, 1 };
+
+		bool found = false;
+
+		while (!open.empty() && (maxNodesToExplore <= 0 || nodesSearched < maxNodes)) {
+			Node n = open.top(); open.pop();
+			int r = n.r, c = n.c;
+			int i = idx(r, c);
+			if (closed[i]) continue;
+			closed[i] = 1;
+			++nodesSearched;
+
+			if (r == goalR && c == goalC) { found = true; break; }
+
+			for (int k = 0; k < 4; ++k) {
+				int nr = r + drs[k];
+				int nc = c + dcs[k];
+				if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+				if (cellIsBlocked(nr, nc)) continue;
+				if (isImmediateBacktrack(nr, nc))
+					continue;
+				int ni = idx(nr, nc);
+				if (closed[ni]) continue;
+				float cellCost = 1.0f;
+				int cellValue = array[nr][nc];
+				if (cellValue == static_cast<int>(Entities::Plant)) {
+					cellCost = 100.0f; // High penalty for plants
+				}
+				// Obstacles already handled by cellIsBlocked()
+				float tentative_g = gScore[i] + cellCost;
+				if (tentative_g < gScore[ni]) {
+					gScore[ni] = tentative_g;
+					parent[ni] = i;
+					float f = tentative_g + heuristic(nr, nc);
+					open.push({ f, nr, nc });
+				}
+			}
+		}
+
+		if (!found) return false;
+
+		// reconstruct path
+		int cur = idx(goalR, goalC);
+		while (parent[cur] != cur) {
+			int r = cur / cols;
+			int c = cur % cols;
+			outPath.emplace_back(r, c);
+			cur = parent[cur];
+		}
+		// add start
+		int sr = cur / cols;
+		int sc = cur % cols;
+		outPath.emplace_back(sr, sc);
+		std::reverse(outPath.begin(), outPath.end());
+		return true;
+		};
+
+	// 2) Try A* from the rounded current cell directly (if free)
+	std::vector<std::pair<int, int>> path;
+	bool directStartTried = false;
+	if (cellIsFree(curRow, curCol)) {
+		directStartTried = true;
+		if (runAStar(curRow, curCol, tgtRow, tgtCol, path)) {
+			// We have a path. Choose the first actionable cell to head toward
+			if (path.size() >= 2) {
+				auto nextCell = path[1];
+				float dx = static_cast<float>(nextCell.second) - currentX;
+				float dy = static_cast<float>(nextCell.first) - currentY; // row is y
+				float distCmF = std::hypot(dx, dy) * precision;
+				int distCm = static_cast<int>(std::round(distCmF));
+				double angleToTargetDeg = std::atan2(-dy, dx) * 180.0 / M_PI;
+				double relative = calculateRelativeAngle(lastAngle, static_cast<float>(angleToTargetDeg));
+				if (distCm > 0) return finalize(distCm, relative, false, false);
+				// else fallthrough
+			}
+		}
+	}
+
+	// 3) If A* failed or current cell wasn't free, try nearby candidate start cells.
+	//    We perform a small flood to gather free cells within radius then run A* from each.
+	const int candidateRadius = 5; // configurable: how far (in cells) to search for alternative starts
+	std::vector<std::pair<int, int>> candidates;
+
+	for (int r = curRow - candidateRadius; r <= curRow + candidateRadius; ++r) {
+		for (int c = curCol - candidateRadius; c <= curCol + candidateRadius; ++c) {
+			if (r < 0 || r >= rows || c < 0 || c >= cols) continue;
+			if (!cellIsFree(r, c)) continue;
+			// only consider candidates that are reachable in continuous space (rough check: distance in cells)
+			float dCells = std::hypot(static_cast<float>(r) - currentY, static_cast<float>(c) - currentX);
+			if (dCells > candidateRadius) continue;
+			candidates.emplace_back(r, c);
+		}
+	}
+
+	if (candidates.empty()) {
+		// No free neighbor cells to try -> unreachable (robot is boxed in)
+		return finalize(0, 0.0, false, true);
+	}
+
+	// For each candidate, run A*. Choose the candidate with the smallest "initial move + path length" cost.
+	bool foundAny = false;
+	double bestCost = std::numeric_limits<double>::infinity();
+	std::vector<std::pair<int, int>> bestPath;
+	std::pair<int, int> bestStart = { -1,-1 };
+
+	for (auto& cand : candidates) {
+		std::vector<std::pair<int, int>> p;
+		if (!runAStar(cand.first, cand.second, tgtRow, tgtCol, p)) continue;
+		// compute initial continuous distance from current position to the first path cell that is not the current rounded cell
+		std::pair<int, int> firstCell = p.front();
+		std::pair<int, int> nextCell;
+		if (firstCell.first == curRow && firstCell.second == curCol) {
+			if (p.size() >= 2) nextCell = p[1];
+			else nextCell = p[0];
+		}
+		else {
+			nextCell = firstCell;
+		}
+
+		float dx = static_cast<float>(nextCell.second) - currentX;
+		float dy = static_cast<float>(nextCell.first) - currentY;
+		double initialMoveCm = std::hypot(dx, dy) * precision;
+
+		// path length in cells (approx) = p.size() - 1
+		double pathLenCm = static_cast<double>(std::max(0, static_cast<int>(p.size()) - 1)) * precision;
+
+		double totalCost = initialMoveCm + pathLenCm;
+		if (totalCost < bestCost) {
+			bestCost = totalCost;
+			bestPath = p;
+			bestStart = cand;
+			foundAny = true;
+		}
+	}
+
+	if (!foundAny) {
+		// No candidate produced a path -> unreachable
+		return finalize(0, 0.0, false, true);
+	}
+
+	// We have bestPath starting at bestStart. Determine the first actionable cell to move toward from actual continuous position.
+	std::pair<int, int> firstCell = bestPath.front();
+	std::pair<int, int> nextCell;
+	if (firstCell.first == curRow && firstCell.second == curCol) {
+		if (bestPath.size() >= 2) nextCell = bestPath[1];
+		else nextCell = bestPath[0];
+	}
+	else {
+		nextCell = firstCell;
+	}
+
+	float dx = static_cast<float>(nextCell.second) - currentX;
+	float dy = static_cast<float>(nextCell.first) - currentY;
+	int distCm = static_cast<int>(std::round(std::hypot(dx, dy) * precision));
+	double angleToTargetDeg = std::atan2(-dy, dx) * 180.0 / M_PI;
+	double relative = calculateRelativeAngle(lastAngle, static_cast<float>(angleToTargetDeg));
+
+	if (distCm > 0) return finalize(distCm, relative, false, false);
+
+	// fallback - should not get here
+	return finalize(0, 0.0, false, true);
+}
+
+
 
 json Map::mapAsJson()
 {
-    json jsonObject;
+	std::lock_guard<std::mutex> lock(mapMutex);
 
-    jsonObject["array"] = json::array();
-    for (int i = 0; i < rows; ++i) {
-        json row = json::array();
-        for (int jIndex = 0; jIndex < cols; ++jIndex) {
-            row.push_back(array[i][jIndex]);
-        }
-        jsonObject["array"].push_back(row);
-    }
+	json jsonObject;
 
-    jsonObject["currentX"] = currentX;
-    jsonObject["currentY"] = currentY;
+	jsonObject["array"] = json::array();
+	for (int i = 0; i < rows; ++i) {
+		json row = json::array();
+		for (int jIndex = 0; jIndex < cols; ++jIndex) {
+			row.push_back(array[i][jIndex]);
+		}
+		jsonObject["array"].push_back(row);
+	}
 
-    jsonObject["rows"] = rows;
-    jsonObject["cols"] = cols;
-    jsonObject["precision"] = precision;
-    return jsonObject;
+	jsonObject["currentX"] = currentX;
+	jsonObject["currentY"] = currentY;
+
+	jsonObject["rows"] = rows;
+	jsonObject["cols"] = cols;
+	jsonObject["precision"] = precision;
+	return jsonObject;
 }
 
 cv::Mat Map::generatePicture()
 {
-    const int minFinalWidth = 1280;
-    const int minFinalHeight = 720;
-    const int baseCellPixelSize = 10;
+	std::lock_guard<std::mutex> lock(mapMutex);
 
-    int gridWidth = cols * baseCellPixelSize;
-    int gridHeight = rows * baseCellPixelSize;
+	const int minFinalWidth = 1280;
+	const int minFinalHeight = 720;
+	const int baseCellPixelSize = 10;
 
-    int currentColIdx = static_cast<int>(std::round(currentX));
-    int currentRowIdx = static_cast<int>(std::round(currentY));
-    int targetColIdx = static_cast<int>(std::round(targetX));
-    int targetRowIdx = static_cast<int>(std::round(targetY));
-    cv::Mat gridImage(gridHeight, gridWidth, CV_8UC3, cv::Scalar(0, 0, 0));
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+	int gridWidth = cols * baseCellPixelSize;
+	int gridHeight = rows * baseCellPixelSize;
 
-            if (i == currentRowIdx && j == currentColIdx) {
-                cv::rectangle(gridImage,
-                    cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
-                    cv::Scalar(0, 255, 0),
-                    cv::FILLED);
-            }
-            else if (i == targetRowIdx && j == targetColIdx)
-            {
-                cv::rectangle(gridImage,
-                    cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
-                    cv::Scalar(255, 0, 0),
-                    cv::FILLED);
-            }
-            else if (array[i][j] == 1) {
-                cv::rectangle(gridImage,
-                    cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
-                    cv::Scalar(255, 255, 255),
-                    cv::FILLED);
-            }
-            else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
-            {
-                cv::rectangle(gridImage,
-                    cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
-                    cv::Scalar(255, 255, 255),
-                    cv::FILLED);
-            }
-        }
-    }
+	int currentColIdx = static_cast<int>(std::round(currentX));
+	int currentRowIdx = static_cast<int>(std::round(currentY));
+	int targetColIdx = static_cast<int>(std::round(targetX));
+	int targetRowIdx = static_cast<int>(std::round(targetY));
+	cv::Mat gridImage(gridHeight, gridWidth, CV_8UC3, cv::Scalar(0, 0, 0));
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
 
-    cv::Mat gray;
-    cv::cvtColor(gridImage, gray, cv::COLOR_BGR2GRAY);
-    cv::Mat edges;
-    cv::Canny(gray, edges, 50, 150, 3);
+			if (i == currentRowIdx && j == currentColIdx) {
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(0, 255, 0),
+					cv::FILLED);
+			}
+			else if (i == targetRowIdx && j == targetColIdx)
+			{
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(255, 0, 0),
+					cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::Obstacle)) {
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(255, 255, 255),
+					cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::Plant)) {
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(0, 128, 0),
+					cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::currentLocation)) {
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(0, 255, 255),
+					cv::FILLED);
+			}
+			else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
+			{
+				cv::rectangle(gridImage,
+					cv::Rect(j * baseCellPixelSize, i * baseCellPixelSize, baseCellPixelSize, baseCellPixelSize),
+					cv::Scalar(255, 255, 255),
+					cv::FILLED);
+			}
+		}
+	}
 
-    std::vector<cv::Vec4i> detectedLines;
-    cv::HoughLinesP(edges, detectedLines, 1, CV_PI / 180, 30, 30, 5);
+	cv::Mat gray;
+	cv::cvtColor(gridImage, gray, cv::COLOR_BGR2GRAY);
+	cv::Mat edges;
+	cv::Canny(gray, edges, 50, 150, 3);
 
-    double scaleFactor = 1.5;
+	std::vector<cv::Vec4i> detectedLines;
+	cv::HoughLinesP(edges, detectedLines, 1, CV_PI / 180, 30, 30, 5);
 
-    int scaledGridWidth = static_cast<int>(gridWidth * scaleFactor);
-    int scaledGridHeight = static_cast<int>(gridHeight * scaleFactor);
+	double scaleFactor = 1.5;
 
-    int finalWidth = std::max(minFinalWidth, scaledGridWidth);
-    int finalHeight = std::max(minFinalHeight, scaledGridHeight);
+	int scaledGridWidth = static_cast<int>(gridWidth * scaleFactor);
+	int scaledGridHeight = static_cast<int>(gridHeight * scaleFactor);
 
-    int offsetX = (finalWidth - scaledGridWidth) / 2;
-    int offsetY = (finalHeight - scaledGridHeight) / 2;
+	int finalWidth = std::max(minFinalWidth, scaledGridWidth);
+	int finalHeight = std::max(minFinalHeight, scaledGridHeight);
 
-    cv::Mat finalImage(finalHeight, finalWidth, CV_8UC3, cv::Scalar(0, 0, 0));
+	int offsetX = (finalWidth - scaledGridWidth) / 2;
+	int offsetY = (finalHeight - scaledGridHeight) / 2;
+
+	cv::Mat finalImage(finalHeight, finalWidth, CV_8UC3, cv::Scalar(0, 0, 0));
 
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            int x = static_cast<int>(j * baseCellPixelSize * scaleFactor) + offsetX;
-            int y = static_cast<int>(i * baseCellPixelSize * scaleFactor) + offsetY;
-            int size = static_cast<int>(baseCellPixelSize * scaleFactor);
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			int x = static_cast<int>(j * baseCellPixelSize * scaleFactor) + offsetX;
+			int y = static_cast<int>(i * baseCellPixelSize * scaleFactor) + offsetY;
+			int size = static_cast<int>(baseCellPixelSize * scaleFactor);
 
-            if (i == currentRowIdx && j == currentColIdx) {
-                cv::rectangle(finalImage, cv::Rect(x - (size * 0.25), y - (size * 0.25), size * 1.5, size * 1.5), cv::Scalar(0, 255, 0), cv::FILLED);
-            }
-            else if (i == targetRowIdx && j == targetColIdx)
-            {
-                cv::rectangle(finalImage, cv::Rect(x - (size * 0.25), y - (size * 0.25), size * 1.5, size * 1.5), cv::Scalar(0, 0, 255), cv::FILLED);
-            }
-            else if (array[i][j] == 1) {
-                cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
-            }
-            else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
-            {
-                cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
-            }
-        }
-    }
+			if (i == currentRowIdx && j == currentColIdx) {
+				cv::rectangle(finalImage, cv::Rect(x - (size * 0.25), y - (size * 0.25), size * 1.5, size * 1.5), cv::Scalar(0, 255, 0), cv::FILLED);
+			}
+			else if (i == targetRowIdx && j == targetColIdx)
+			{
+				cv::rectangle(finalImage, cv::Rect(x - (size * 0.25), y - (size * 0.25), size * 1.5, size * 1.5), cv::Scalar(0, 0, 255), cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::Obstacle)) {
+				cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::Plant)) {
+				cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(0, 128, 0), cv::FILLED);
+			}
+			else if (array[i][j] == static_cast<int>(Entities::currentLocation)) {
+				cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(0, 255, 255), cv::FILLED);
+			}
+			else if (i == 0 || j == 0 || j == (cols - 1) || i == (rows - 1))
+			{
+				cv::rectangle(finalImage, cv::Rect(x, y, size, size), cv::Scalar(255, 255, 255), cv::FILLED);
+			}
+		}
+	}
 
-    return finalImage;
+	return finalImage;
 }
+void Map::markRecentCell(int r, int c)
+{
+	// bounds-safe guard (avoid crashes if called before arrays initialized)
+	if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+
+	// Avoid duplicate consecutive entries (stay idempotent if robot vibrates in same cell)
+	if (!recentCells.empty()) {
+		auto last = recentCells.back();
+		if (last.first == r && last.second == c) return;
+	}
+
+	recentCells.emplace_back(r, c);
+	if (tempVisited) tempVisited[r][c] = 1;
+
+	if (recentCells.size() > recentLimit) {
+		auto old = recentCells.front();
+		recentCells.pop_front();
+		if (tempVisited && old.first >= 0 && old.first < rows && old.second >= 0 && old.second < cols)
+			tempVisited[old.first][old.second] = 0;
+	}
+}
+
+
+bool Map::isImmediateBacktrack(int r, int c) const
+{
+	// Immediate backtrack = stepping into the cell visited *before* the last one.
+	// If we have fewer than 2 entries there is no "previous" cell to block.
+	if (recentCells.size() < 2) return false;
+	auto prev = recentCells[recentCells.size() - 2];
+	return (prev.first == r && prev.second == c);
+}
+
+
+void Map::clearRecentVisits()
+{
+	recentCells.clear();
+	for (int i = 0; i < rows; ++i)
+		for (int j = 0; j < cols; ++j)
+			tempVisited[i][j] = 0;
+}
+void Map::setRobotSizeCm(int widthCm, int heightCm)
+{
+	robotWidthCm = widthCm;
+	robotHeightCm = heightCm;
+
+	int maxDim = std::max(widthCm, heightCm);
+	robotRadiusCells = (maxDim + precision - 1) / (2 * precision);
+
+	inflateObstaclesForRobotSize();
+}
+void Map::inflateObstaclesForRobotSize()
+{
+	if (robotRadiusCells <= 0) return;
+
+	// Snapshot original map
+	int** original = allocateArray(rows, cols);
+	for (int r = 0; r < rows; ++r)
+		for (int c = 0; c < cols; ++c)
+			original[r][c] = array[r][c];
+
+	// Inflate from original obstacles/plants only
+	for (int r = 0; r < rows; ++r)
+	{
+		for (int c = 0; c < cols; ++c)
+		{
+			int v = original[r][c];
+			if (v == static_cast<int>(Entities::Obstacle) ||
+				v == static_cast<int>(Entities::Plant))
+			{
+				for (int dr = -robotRadiusCells; dr <= robotRadiusCells; ++dr)
+				{
+					for (int dc = -robotRadiusCells; dc <= robotRadiusCells; ++dc)
+					{
+						int rr = r + dr;
+						int cc = c + dc;
+						if (rr < 0 || cc < 0 || rr >= rows || cc >= cols) continue;
+
+						if (array[rr][cc] == static_cast<int>(Entities::freeDistance))
+							array[rr][cc] = static_cast<int>(Entities::Obstacle);
+
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < rows; ++i) delete[] original[i];
+	delete[] original;
+}
+
