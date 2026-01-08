@@ -12,7 +12,7 @@ void buildArenaSurroundCurrent(Map& map, int targetCol, int targetRow,
 int main()
 {
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_SILENT);
-    Map map;
+    Map map(200, 200); // 200cm x 200cm world
 
     buildArenaSurroundCurrent(map, 6, 4);
     map.setTargetLocation(18, 34);
@@ -282,4 +282,6 @@ void buildArenaSurroundCurrent(Map& map, int targetCol, int targetRow,
             if ((std::rand() % 100) < 30) placeCell(r, c);
         }
     }
+
+    // Done: arena built. You can visualize with map.generatePicture() and check corridor.
 }
