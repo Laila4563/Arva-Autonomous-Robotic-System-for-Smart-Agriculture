@@ -8,4 +8,4 @@ train/
 # Optional: ignore other temporary files
 __pycache__/
 *.log
-*.csv
+
