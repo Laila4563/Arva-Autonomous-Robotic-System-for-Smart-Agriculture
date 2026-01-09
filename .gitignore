@@ -1,0 +1,12 @@
+# Ignore dataset folders
+train/
+val/
+test/
+
+# # Keep YOLO weights and code
+# !*.pt
+
+# # Optional: ignore other temporary files
+# __pycache__/
+# *.log
+# *.csv
