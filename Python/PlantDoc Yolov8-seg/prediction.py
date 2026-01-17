@@ -4,7 +4,7 @@ from ultralytics import YOLO
 # --- Configuration ---
 # YOLOv8 saves to 'runs/segment/train' by default. 
 # If you ran it multiple times, it might be 'train2', 'train3', etc.
-WEIGHTS_PATH = "./runs/segment/train4/weights/best.pt" 
+WEIGHTS_PATH = "./runs/segment/train2/weights/best.pt" 
 
 # Folder containing your unseen images
 INPUT_FOLDER_PATH = "./Unseen Images For Prediction" 
@@ -43,7 +43,7 @@ def run_prediction():
         save=True,      # Saves annotated images to runs/predict/segmentation_results
         save_txt=True,  # Saves the prediction coordinates (useful for debugging)
         project='runs/predict', 
-        name='segmentation_results',
+        name='segmentation_results for train2',
         exist_ok=True,  # Overwrites the folder instead of creating 'segmentation_results2'
         device=0        # Uses GPU for fast prediction
     )
