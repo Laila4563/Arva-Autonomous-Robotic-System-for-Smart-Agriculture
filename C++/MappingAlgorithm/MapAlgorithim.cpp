@@ -38,92 +38,114 @@ void Map::freeTempVisitedArray(unsigned char** arr, int r)
 	delete[] arr;
 }
 
-void Map::ensureFit(int newRow, int newCol)
+//void Map::ensureFit(int newRow, int newCol)
+//{
+//	int padTop = 0, padBottom = 0, padLeft = 0, padRight = 0;
+//
+//	if (newRow < 0)
+//		padTop = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newRow) : -newRow;
+//	if (newRow >= rows)
+//		padBottom = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newRow - rows + 1) : newRow - rows + 1;
+//	if (newCol < 0)
+//		padLeft = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newCol) : -newCol;
+//	if (newCol >= cols)
+//		padRight = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newCol - cols + 1) : newCol - cols + 1;
+//
+//	if (padTop == 0 && padBottom == 0 && padLeft == 0 && padRight == 0)
+//		return;
+//
+//	int newRows = rows + padTop + padBottom;
+//	int newCols = cols + padLeft + padRight;
+//	int** newArray = allocateArray(newRows, newCols);
+//	char** newDirMap = allocateDirArray(newRows, newCols);
+//	unsigned char** newTempVisited = allocateTempVisitedArray(newRows, newCols);
+//
+//	for (int i = 0; i < rows; ++i) {
+//		std::memcpy(newArray[i + padTop] + padLeft, array[i], cols * sizeof(int));
+//		std::memcpy(newDirMap[i + padTop] + padLeft, dirMap[i], cols * sizeof(char));
+//		if (tempVisited)
+//			std::memcpy(newTempVisited[i + padTop] + padLeft, tempVisited[i], cols * sizeof(unsigned char));
+//
+//	}
+//	freeTempVisitedArray(tempVisited, rows);
+//
+//	for (int i = 0; i < rows; ++i) {
+//		delete[] array[i];
+//		delete[] dirMap[i];
+//	}
+//	delete[] array;
+//	delete[] dirMap;
+//
+//	array = newArray;
+//	dirMap = newDirMap;
+//	tempVisited = newTempVisited;
+//
+//	originRow += padTop;
+//	originCol += padLeft;
+//	currentY += padTop;
+//	currentX += padLeft;
+//	rows = newRows;
+//	cols = newCols;
+//}
+bool Map::isInside(int r, int c) const
 {
-	int padTop = 0, padBottom = 0, padLeft = 0, padRight = 0;
-
-	if (newRow < 0)
-		padTop = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newRow) : -newRow;
-	if (newRow >= rows)
-		padBottom = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newRow - rows + 1) : newRow - rows + 1;
-	if (newCol < 0)
-		padLeft = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, -newCol) : -newCol;
-	if (newCol >= cols)
-		padRight = (prealloc_cm > 0) ? std::max(prealloc_cm / precision, newCol - cols + 1) : newCol - cols + 1;
-
-	if (padTop == 0 && padBottom == 0 && padLeft == 0 && padRight == 0)
-		return;
-
-	int newRows = rows + padTop + padBottom;
-	int newCols = cols + padLeft + padRight;
-	int** newArray = allocateArray(newRows, newCols);
-	char** newDirMap = allocateDirArray(newRows, newCols);
-	unsigned char** newTempVisited = allocateTempVisitedArray(newRows, newCols);
-
-	for (int i = 0; i < rows; ++i) {
-		std::memcpy(newArray[i + padTop] + padLeft, array[i], cols * sizeof(int));
-		std::memcpy(newDirMap[i + padTop] + padLeft, dirMap[i], cols * sizeof(char));
-		if (tempVisited)
-			std::memcpy(newTempVisited[i + padTop] + padLeft, tempVisited[i], cols * sizeof(unsigned char));
-
-	}
-	freeTempVisitedArray(tempVisited, rows);
-
-	for (int i = 0; i < rows; ++i) {
-		delete[] array[i];
-		delete[] dirMap[i];
-	}
-	delete[] array;
-	delete[] dirMap;
-
-	array = newArray;
-	dirMap = newDirMap;
-	tempVisited = newTempVisited;
-
-	originRow += padTop;
-	originCol += padLeft;
-	currentY += padTop;
-	currentX += padLeft;
-	rows = newRows;
-	cols = newCols;
+	return (r >= 0 && r < rows && c >= 0 && c < cols);
 }
 
 void Map::internalUpdate(float cm, float angle)
 {
-	// angle in degrees. Movement logic unchanged from your original implementation.
 	float angleRad = angle * M_PI / 180.0f;
 	float dx = std::cos(angleRad);
 	float dy = -std::sin(angleRad);
 
-	char directionChar = (std::abs(dx) > std::abs(dy)) ? 'H' : 'V';
-
-	int subdivisions = std::max(2, static_cast<int>(std::ceil(cm / (precision / 2.0f))));
-	float subDistance_cm = cm / subdivisions;
-	float cellStep = subDistance_cm / precision; // because precision == cm per cell
+	int subdivisions = std::max(2, (int)std::ceil(cm / (precision / 2.0f)));
+	float subDistCells = (cm / precision) / subdivisions;
 
 	for (int i = 0; i < subdivisions; ++i) {
-		currentX += dx * cellStep;
-		currentY += dy * cellStep;
-		int mapX = std::round(currentX);
-		int mapY = std::round(currentY);
+		float nextX = currentX + dx * subDistCells;
+		float nextY = currentY + dy * subDistCells;
 
-		ensureFit(mapY, mapX);
+		int r = (int)std::round(nextY);
+		int c = (int)std::round(nextX);
 
-		mapX = std::round(currentX);
-		mapY = std::round(currentY);
-		markRecentCell(mapY, mapX);
+		// ❗ HARD STOP AT MAP BOUNDARY
+		if (!isInside(r, c))
+			break;
 
-		dirMap[mapY][mapX] = directionChar;
+		currentX = nextX;
+		currentY = nextY;
+
+		markRecentCell(r, c);
+		dirMap[r][c] = (std::abs(dx) > std::abs(dy)) ? 'H' : 'V';
 	}
 }
 
-Map::Map() : rows(1), cols(1), originRow(0), originCol(0), currentX(0), currentY(0) {
+
+Map::Map(int widthCm, int heightCm)
+{
+	cols = widthCm / precision;
+	rows = heightCm / precision;
+
+	if (cols <= 0) cols = 1;
+	if (rows <= 0) rows = 1;
+
 	array = allocateArray(rows, cols);
 	dirMap = allocateDirArray(rows, cols);
 	tempVisited = allocateTempVisitedArray(rows, cols);
-	array[originRow][originCol] = static_cast<int>(Entities::freeDistance);
-	dirMap[originRow][originCol] = 'S';
+
+	// Start robot in CENTER of map
+	currentX = cols / 2.0f;
+	currentY = rows / 2.0f;
+
+	originRow = 0;
+	originCol = 0;
+
+	array[(int)currentY][(int)currentX] =
+		static_cast<int>(Entities::currentLocation);
+
+	dirMap[(int)currentY][(int)currentX] = 'S';
 }
+
 
 Map::~Map()
 {
@@ -239,71 +261,24 @@ void Map::apply(Direction movement)
 
 void Map::add(Entities entity, int distanceCm)
 {
-	std::lock_guard<std::mutex> lock(mapMutex);
-
-	// place entity at distanceCm in front of current position
 	float angleRad = lastAngle * M_PI / 180.0f;
 	float dx = std::cos(angleRad);
 	float dy = -std::sin(angleRad);
 
-	// convert cm to grid cells (1 cell == precision cm)
-	float cellsAheadF = static_cast<float>(distanceCm) / static_cast<float>(precision);
-	int cellsAhead = static_cast<int>(std::round(cellsAheadF));
+	int cells = (int)std::round((float)distanceCm / precision);
 
-	// compute target coords using current position (these are in grid cell units)
-	float targetXf = currentX + dx * static_cast<float>(cellsAhead);
-	float targetYf = currentY + dy * static_cast<float>(cellsAhead);
+	int r = (int)std::round(currentY + dy * cells);
+	int c = (int)std::round(currentX + dx * cells);
 
-	int mapX = static_cast<int>(std::round(targetXf));
-	int mapY = static_cast<int>(std::round(targetYf));
-
-	// Ensure we have room for the target cell. This may reallocate and shift
-	// currentX/currentY/origin, so we MUST recompute indices afterwards.
-	ensureFit(mapY, mapX);
-
-	// Recompute target indices because ensureFit may have shifted currentX/currentY.
-	// (Important: use the same dx/dy/cellsAhead so recomputed indices match post-shift grid)
-	targetXf = currentX + dx * static_cast<float>(cellsAhead);
-	targetYf = currentY + dy * static_cast<float>(cellsAhead);
-
-	mapX = static_cast<int>(std::round(targetXf));
-	mapY = static_cast<int>(std::round(targetYf));
-
-	// Defensive check: if we're still out of bounds for some reason, expand again
-	if (mapY < 0 || mapY >= rows || mapX < 0 || mapX >= cols) {
-		ensureFit(mapY, mapX);
-		// recompute once more (should now be inside)
-		targetXf = currentX + dx * static_cast<float>(cellsAhead);
-		targetYf = currentY + dy * static_cast<float>(cellsAhead);
-		mapX = static_cast<int>(std::round(targetXf));
-		mapY = static_cast<int>(std::round(targetYf));
-	}
-
-	// Final safety: validate pointers / ranges before writing
-	if (array == nullptr || dirMap == nullptr) {
-		std::cerr << "Map::add - ERROR: array or dirMap is null\n";
+	if (!isInside(r, c))
 		return;
-	}
-	if (mapY < 0 || mapY >= rows || mapX < 0 || mapX >= cols) {
-		std::cerr << "Map::add - ERROR: indices still out of range after ensureFit: "
-			<< "mapY=" << mapY << " rows=" << rows << " mapX=" << mapX << " cols=" << cols << '\n';
-		return;
-	}
 
-	// store the entity value into the occupancy array
-	array[mapY][mapX] = static_cast<int>(entity);
+	array[r][c] = static_cast<int>(entity);
 
-	// update dirMap for quick visualization if useful
-	if (entity == Entities::Obstacle || entity == Entities::Plant) {
-		// inflate in place (this uses robotRadiusCells)
+	if (entity == Entities::Obstacle || entity == Entities::Plant)
 		inflateObstaclesForRobotSize();
-	}
-
-	// update dirMap for quick visualization if useful
-	if (entity == Entities::Obstacle) dirMap[mapY][mapX] = 'X';
-	else if (entity == Entities::Plant) dirMap[mapY][mapX] = 'P'; 
-	else dirMap[mapY][mapX] = ' ';
 }
+
 
 void Map::print() const
 {
@@ -506,7 +481,7 @@ Map::Motion Map::NextMove()
 	}
 
 	auto cellIsFree = [&](int r, int c) -> bool {
-		if (r < 0 || r >= rows || c < 0 || c >= cols) return false;
+		if (!isInside(r, c)) return false;
 		int v = array[r][c];
 		return (v == static_cast<int>(Entities::freeDistance) || v == static_cast<int>(Entities::currentLocation));
 		};
