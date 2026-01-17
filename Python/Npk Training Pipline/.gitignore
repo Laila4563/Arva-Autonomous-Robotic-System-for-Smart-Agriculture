@@ -1,2 +1,3 @@
 #Ignoring Dataset
 Crop_recommendation.csv
+__pycache__/

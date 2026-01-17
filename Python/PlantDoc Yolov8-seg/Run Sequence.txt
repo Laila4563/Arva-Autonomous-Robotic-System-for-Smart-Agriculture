@@ -1,0 +1,4 @@
+1- Run removing_unwanted_classes.py --> (to remove the classes that are not planted in egypt)
+2- Run Preprocessing_dataset.py --> (to balance the data and preprocess it to match the seg model)
+3- Run Training_yolov8n_seg.py 
+4- Run Prediction.py
