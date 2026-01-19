@@ -1,3 +1,0 @@
-
-PlantDoc Dataset Link:
-https://www.kaggle.com/datasets/andresmgs/plantdec
