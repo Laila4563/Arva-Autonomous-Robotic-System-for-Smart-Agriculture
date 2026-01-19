@@ -1,4 +1,0 @@
-Dataset Link:
-https://www.kaggle.com/datasets/sebastianpalaciob/plantvillage-for-object-detection-yolo
-
-(Note: Dataset folders are excluded from the repository using .gitignore)
