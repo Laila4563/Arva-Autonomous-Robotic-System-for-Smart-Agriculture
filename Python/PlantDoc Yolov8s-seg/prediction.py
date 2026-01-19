@@ -44,7 +44,7 @@ def run_prediction():
         retina_masks=True,
         save=True,      # Saves annotated images to runs/predict/segmentation_results
         save_txt=True,  # Saves the prediction coordinates (useful for debugging)
-        project='runs/predict', 
+        project='predict', 
         name='segmentation_results for train2',
         exist_ok=True,  # Overwrites the folder instead of creating 'segmentation_results2'
         device=0        # Uses GPU for fast prediction
