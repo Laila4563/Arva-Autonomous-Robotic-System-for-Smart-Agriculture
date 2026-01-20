@@ -1,0 +1,5 @@
+train: C:/Users/20111/OneDrive/Dokumente/GitHub/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/python/insect & pest pipeline/dataset/train/images
+val: C:/Users/20111/OneDrive/Dokumente/GitHub/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/python/insect & pest pipeline/dataset/val/images
+test: C:/Users/20111/OneDrive/Dokumente/GitHub/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/python/insect & pest pipeline/dataset/test/images
+nc: 1
+names: ['pest']

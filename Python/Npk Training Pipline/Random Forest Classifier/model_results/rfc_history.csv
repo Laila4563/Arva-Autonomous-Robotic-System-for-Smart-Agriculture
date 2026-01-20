@@ -1,0 +1,2 @@
+Model,Train Accuracy,CV Score,Test Accuracy,Bias Estimate,Variance Estimate,is_scaled
+Random Forest Classifier (RFC),0.9971590909090909,0.9920454545454545,0.990909090909091,Low,Low,False

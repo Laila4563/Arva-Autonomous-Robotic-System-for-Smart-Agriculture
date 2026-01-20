@@ -1,0 +1,2 @@
+Model,Train Accuracy,CV Score,Test Accuracy,Bias Estimate,Variance Estimate,is_scaled
+AdaBoost Classifier (ADA),0.9988636363636364,0.9829545454545455,0.9840909090909091,Low,Low,False

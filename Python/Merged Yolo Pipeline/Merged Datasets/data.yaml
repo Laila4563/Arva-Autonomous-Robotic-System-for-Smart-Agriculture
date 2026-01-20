@@ -1,0 +1,19 @@
+names:
+- Apple Scab Leaf
+- Apple leaf
+- Bell_pepper leaf spot
+- Bell_pepper leaf
+- Corn leaf blight
+- Potato leaf late blight
+- Potato leaf
+- Squash Powdery mildew leaf
+- Strawberry leaf
+- Tomato mold leaf
+- Tomato leaf
+- pest
+- path 
+nc: 13
+path: C:\Users\HP\OneDrive - Misr International University\Desktop\Arva 2\Arva-Autonomous-Robotic-System-for-Smart-Agriculture\Python\Merged Yolo Pipeline\Merged Datasets\data.yaml
+train: ../train/images
+val: ../valid/images
+test: ../test/images

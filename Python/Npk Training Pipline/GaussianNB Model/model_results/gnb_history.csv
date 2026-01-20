@@ -1,0 +1,2 @@
+Model,Train Accuracy,CV Score,Test Accuracy,Bias Estimate,Variance Estimate,is_scaled
+Gaussian Naive Bayes (GNB),0.99375,0.9926136363636363,0.990909090909091,Low,Low,False

@@ -1,0 +1,2 @@
+Model,Train Accuracy,CV Score,Test Accuracy,Bias Estimate,Variance Estimate,is_scaled
+Support Vector Classifier (SVC),0.9926136363636363,0.9857954545454545,0.9772727272727273,Low,Low,True
