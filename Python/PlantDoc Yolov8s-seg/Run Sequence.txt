@@ -1,7 +1,0 @@
-
-1- Download the PlantDoc Dataset
-2- Run removing_unwanted_classes.py --> (to remove the classes that are not planted in egypt and update the .yaml
- file with the new classes)
-3- Run Preprocessing_dataset.py --> (to balance the data and preprocess it to match the seg model)
-4- Run Training_yolov8s_seg.py 
-5- Run Prediction.py
