@@ -3,3 +3,4 @@ val: C:/Users/20111/OneDrive/Dokumente/GitHub/Arva-Autonomous-Robotic-System-for
 test: C:/Users/20111/OneDrive/Dokumente/GitHub/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/python/insect & pest pipeline/dataset/test/images
 nc: 1
 names: ['pest']
+task: segment
