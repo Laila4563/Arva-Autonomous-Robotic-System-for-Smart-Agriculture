@@ -310,7 +310,7 @@ new_data_points = [
 
 # Create new data DataFrame
 new_data_df = pd.DataFrame(
-    new_data_points, 
+    new_data_points,
     columns=['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
 )
 
@@ -319,7 +319,7 @@ new_data_df['N_to_K'] = new_data_df.apply(lambda row: row['N'] / row['K'] if row
 new_data_df['P_to_K'] = new_data_df.apply(lambda row: row['P'] / row['K'] if row['K'] != 0 else np.nan, axis=1)
 new_data_df['NPK_Sum'] = new_data_df['N'] + new_data_df['P'] + new_data_df['K']
 new_data_df['Moisture_Index'] = new_data_df.apply(lambda row: row['humidity'] / row['rainfall'] if row['rainfall'] != 0 else np.nan, axis=1)
-new_data_df.fillna(new_data_df.mean(numeric_only=True), inplace=True) 
+new_data_df.fillna(new_data_df.mean(numeric_only=True), inplace=True)
 
 
 # 2. Prepare the new data based on the best model's scaling requirement
@@ -331,7 +331,7 @@ else:
     data_type = "UNSCALED"
 
 # 3. Perform the prediction using the best model
-new_predictions = best_model.predict(X_new_predict) 
+new_predictions = best_model.predict(X_new_predict)
 new_data_df['Predicted Crop'] = new_predictions
 
 print(f"Model Recommendations for Unseen Data (using {best_model_name}, trained on {data_type} data):")
