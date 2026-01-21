@@ -7,10 +7,10 @@ def main():
         print("Using GPU:", torch.cuda.get_device_name(0))
 
     # Load trained model (BEST weights)
-    model = YOLO("runs/train/pest_single_class/weights/best.pt")
+    model = YOLO("runs/segment/pest_single_class_seg2/weights/best.pt")
 
     # Path to your test image (downloaded from Google)
-    image_path = "test4.jpg"   # change if needed
+    image_path = "test2.webp"   # change if needed
 
     # Run inference
     results = model.predict(
