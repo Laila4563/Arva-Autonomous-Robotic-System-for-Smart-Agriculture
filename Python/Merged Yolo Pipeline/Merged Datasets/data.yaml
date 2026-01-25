@@ -1,19 +1,21 @@
-names:
-- Apple Scab Leaf
-- Apple leaf
-- Bell_pepper leaf spot
-- Bell_pepper leaf
-- Corn leaf blight
-- Potato leaf late blight
-- Potato leaf
-- Squash Powdery mildew leaf
-- Strawberry leaf
-- Tomato mold leaf
-- Tomato leaf
-- pest
-- path 
+# path: C:/Users/HP/OneDrive - Misr International University/Desktop/Arva 2/Arva-Autonomous-Robotic-System-for-Smart-Agriculture/Python/Merged Yolo Pipeline/Merged Datasets
+
+train: C:\Users\20111\OneDrive\Dokumente\GitHub\Arva-Autonomous-Robotic-System-for-Smart-Agriculture\Python\Merged Yolo Pipeline\Merged Datasets\train\images
+val: C:\Users\20111\OneDrive\Dokumente\GitHub\Arva-Autonomous-Robotic-System-for-Smart-Agriculture\Python\Merged Yolo Pipeline\Merged Datasets\val\images
+test: C:\Users\20111\OneDrive\Dokumente\GitHub\Arva-Autonomous-Robotic-System-for-Smart-Agriculture\Python\Merged Yolo Pipeline\Merged Datasets\test\images
+
 nc: 13
-path: C:\Users\HP\OneDrive - Misr International University\Desktop\Arva 2\Arva-Autonomous-Robotic-System-for-Smart-Agriculture\Python\Merged Yolo Pipeline\Merged Datasets\data.yaml
-train: ../train/images
-val: ../valid/images
-test: ../test/images
+names:
+  0: Apple_Scab_Leaf
+  1: Apple_leaf
+  2: Bell_pepper_leaf_spot
+  3: Bell_pepper_leaf
+  4: Corn_leaf_blight
+  5: Potato_leaf_late_blight
+  6: Potato_leaf
+  7: Squash_Powdery_mildew_leaf
+  8: Strawberry_leaf
+  9: Tomato_mold_leaf
+  10: Tomato_leaf
+  11: pest
+  12: soil
