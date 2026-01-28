@@ -24,7 +24,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Arva Smart Agriculture',
       // Change this line to the route name you want to work on
-      initialRoute: '/crop_recommendation',
+      initialRoute: '/pest_detection',
       routes: {
         '/': (context) => const LoginPage(),
         '/register': (context) => const RegistrationPage(),

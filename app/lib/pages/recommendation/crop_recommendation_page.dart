@@ -82,7 +82,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                 cropName: "RICE",
                 imagePath: "assets/images/rice crop.jpg",
                 season: "Summer",
-                water: "Irrigated, Rainfed",
+                water: "Irrigated",
                 soils: "Alluvial, Loamy, Clay",
                 sowing: "Jun to Jul",
                 harvest: "Sep to Oct",
@@ -111,7 +111,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     );
   }
 
-  // --- NEW: Grouped Section (Banner + Card) ---
+  // --- Grouped Section (Banner + Card) ---
   Widget _buildCropSection({
     required String cropName,
     required String imagePath,
@@ -124,7 +124,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   }) {
     return Column(
       children: [
-        _buildCropBanner(cropName), // The Button-style name banner
+        _buildCropBanner(cropName), 
         const SizedBox(height: 16),
         _buildDetailedCropCard(
           cropName: cropName,
@@ -140,7 +140,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     );
   }
 
-  // --- The Banner Method (Button style with Name) ---
+  // --- Crop Banner UI ---
   Widget _buildCropBanner(String name) {
     return Container(
       width: double.infinity,
@@ -149,13 +149,14 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         color: primaryGreen,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: primaryGreen.withOpacity(0.3), blurRadius: 20),
+          BoxShadow(color: primaryGreen.withValues(alpha: 0.3), blurRadius: 20),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text("🌾", style: TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
           Text(
             "RECOMMENDED CROP: $name",
             style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 15),
@@ -165,6 +166,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     );
   }
 
+  // --- Detailed Card UI ---
   Widget _buildDetailedCropCard({
     required String cropName,
     required String imagePath,
@@ -179,7 +181,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 10))],
+        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 10))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +198,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                   errorBuilder: (c, e, s) => Container(
                     height: 200,
                     width: double.infinity,
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     child: const Icon(Icons.image_not_supported, color: Colors.grey),
                   ),
                 ),
@@ -207,7 +209,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: primaryGreen, width: 1.5),
                   ),
@@ -239,7 +241,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -264,12 +266,12 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     );
   }
 
-  // --- Shared Mode Switch UI ---
+  // --- Switch Logic ---
   Widget _buildModeSwitch() {
     return Container(
       height: 55,
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -290,7 +292,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
           decoration: BoxDecoration(
             color: active ? (isDarkMode ? const Color(0xFF1A221A) : Colors.white) : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: active && !isDarkMode ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
+            boxShadow: active && !isDarkMode ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
           ),
           child: Center(
             child: Text(
@@ -328,8 +330,8 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
-        border: Border.all(color: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.transparent),
+        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.transparent),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -357,7 +359,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                 contentPadding: EdgeInsets.zero,
                 suffixText: unit,
                 suffixStyle: TextStyle(color: accentGreen, fontSize: 8),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: accentGreen.withOpacity(0.2))),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: accentGreen.withValues(alpha: 0.2))),
               ),
             ),
         ],
@@ -381,8 +383,8 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.black : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primaryGreen.withOpacity(0.4)),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
+        border: Border.all(color: primaryGreen.withValues(alpha: 0.4)),
+        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
       ),
       child: Row(
         children: [
@@ -401,7 +403,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         backgroundColor: primaryGreen,
         foregroundColor: Colors.black,
         elevation: isDarkMode ? 0 : 4,
-        shadowColor: primaryGreen.withOpacity(0.3),
+        shadowColor: primaryGreen.withValues(alpha: 0.3),
         minimumSize: const Size(double.infinity, 55),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
@@ -410,19 +412,13 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   }
 
   Widget _buildStyledRow(String l1, String v1, String l2, String v2) {
-    return Row(
-      children: [
-        Expanded(child: _buildStyledItem(l1, v1)),
-        const SizedBox(width: 16),
-        Expanded(child: _buildStyledItem(l2, v2)),
-      ],
-    );
+    return Row(children: [Expanded(child: _buildStyledItem(l1, v1)), const SizedBox(width: 16), Expanded(child: _buildStyledItem(l2, v2))]);
   }
 
   Widget _buildStyledItem(String label, String value) {
     return Container(
       padding: const EdgeInsets.only(left: 12),
-      decoration: BoxDecoration(border: Border(left: BorderSide(color: primaryGreen.withOpacity(0.3), width: 2))),
+      decoration: BoxDecoration(border: Border(left: BorderSide(color: primaryGreen.withValues(alpha: 0.3), width: 2))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
