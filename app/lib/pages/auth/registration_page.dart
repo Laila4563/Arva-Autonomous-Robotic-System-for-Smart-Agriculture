@@ -9,36 +9,39 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  // 1. Logic variable to track the theme state
   bool isDarkMode = true;
 
-  // Constants
-  static const Color primaryColor = Color(0xFF13EC13);
-  static const Color backgroundDark = Color(0xFF102210);
-  static const Color backgroundLight = Color(0xFFF6F8F6);
+  // --- THEME COLORS ---
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color skyBlue = Color(0xFF56B9C7); // Good for Dark Mode
+  static const Color skyBlueDark = Color(0xFF007A8A); // Better contrast for Light Mode
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color deepForest = Color(0xFF102210);
+  static const Color ironGrey = Color(0xFF546E7A);
+  static const Color backgroundLight = Color.fromARGB(255, 246, 248, 246); // Increased opacity for stability
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic colors based on the theme state
-    final Color currentBg = isDarkMode ? backgroundDark : backgroundLight;
-    final Color textColor = isDarkMode ? Colors.white : backgroundDark;
-    final Color subTextColor = isDarkMode ? Colors.grey : Colors.black54;
+    // Dynamic colors based on theme state
+    final Color currentBg = isDarkMode ? deepForest : backgroundLight;
+    final Color textColor = isDarkMode ? Colors.white : deepForest;
+    
+    // UPDATED: Now picks a darker blue for light mode so it doesn't disappear
+    final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
 
     return Scaffold(
       backgroundColor: currentBg,
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Opacity(
-              opacity: isDarkMode ? 1.0 : 0.3, // Fade image more in light mode
+              opacity: isDarkMode ? 0.4 : 0.1,
               child: Image.asset(
                 'assets/images/Register Background.jpg',
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Gradient Overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -47,7 +50,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   end: Alignment.bottomCenter,
                   colors: [
                     currentBg.withValues(alpha: 0.4),
-                    currentBg.withValues(alpha: 0.6),
+                    currentBg.withValues(alpha: 0.7),
                     currentBg,
                   ],
                 ),
@@ -70,7 +73,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         _buildRoundButton(Icons.arrow_back, textColor),
                         Row(
                           children: [
-                            // 2. THE THEME TOGGLE BUTTON
                             _buildRoundButton(
                               isDarkMode ? Icons.light_mode : Icons.dark_mode,
                               textColor,
@@ -85,16 +87,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               height: 10,
                               width: 10,
                               decoration: const BoxDecoration(
-                                  color: primaryColor, shape: BoxShape.circle),
+                                color: harvestGold,
+                                shape: BoxShape.circle,
+                              ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
+                            const Text(
                               "SYSTEM ONLINE",
                               style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 10,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.bold),
+                                color: sproutGreen,
+                                fontSize: 10,
+                                letterSpacing: 2,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -102,22 +107,50 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
 
-                  // Header
+                  // Logo Section
                   Row(
                     children: [
-                      const Icon(Icons.precision_manufacturing,
-                          color: primaryColor, size: 40),
-                      const SizedBox(width: 10),
-                      Text("ARVA",
-                          style: TextStyle(
+                      Container(
+                        height: 60,
+                        width: 60,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.black.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: ironGrey.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "ARVA",
+                            style: TextStyle(
                               color: textColor,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: -1)),
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          Container(height: 2, width: 40, color: sproutGreen),
+                        ],
+                      ),
                     ],
                   ),
-                  Text("Autonomous Agriculture Management System",
-                      style: TextStyle(color: subTextColor, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Autonomous Agriculture Management System",
+                    style: TextStyle(color: subTextColor, fontSize: 16),
+                  ),
 
                   const SizedBox(height: 30),
 
@@ -132,67 +165,102 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           color: currentBg.withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: textColor.withValues(alpha: 0.1)),
+                            color: ironGrey.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Register Account",
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold)),
-                            Text("Join the network of autonomous farming.",
-                                style: TextStyle(
-                                    color: subTextColor, fontSize: 14)),
+                            Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "Join the network of autonomous farming.",
+                              style: TextStyle(
+                                color: subTextColor.withValues(alpha: 0.7),
+                                fontSize: 14,
+                              ),
+                            ),
                             const SizedBox(height: 24),
 
-                            _buildInputLabel(Icons.person, "Full Name", subTextColor),
-                            _buildTextField("John Cooper", textColor),
+                            _buildInputLabel(
+                              Icons.person,
+                              "Full Name",
+                              isDarkMode ? sproutGreen : sproutGreen, 
+                            ),
+                            _buildTextField(
+                              "John Cooper",
+                              textColor,
+                              isDarkMode,
+                            ),
                             const SizedBox(height: 16),
-                            _buildInputLabel(Icons.email, "Email Address", subTextColor),
-                            _buildTextField("arva@gmail.com", textColor),
+                            _buildInputLabel(
+                              Icons.email,
+                              "Email Address",
+                              isDarkMode ? sproutGreen : sproutGreen,
+                            ),
+                            _buildTextField(
+                              "name@example.com",
+                              textColor,
+                              isDarkMode,
+                            ),
                             const SizedBox(height: 16),
-                            _buildInputLabel(Icons.lock, "Password", subTextColor),
-                            _buildTextField("••••••••", textColor, isPassword: true),
+                            _buildInputLabel(
+                              Icons.lock,
+                              "Password",
+                              isDarkMode ? sproutGreen : sproutGreen,
+                            ),
+                            _buildTextField(
+                              "••••••••",
+                              textColor,
+                              isDarkMode,
+                              isPassword: true,
+                            ),
 
                             const SizedBox(height: 24),
 
-                            // Create Account Button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  debugPrint("Account Created");
-                                },
+                                onPressed: () {},
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: primaryColor,
-                                  foregroundColor: backgroundDark,
-                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  backgroundColor: sproutGreen,
+                                  foregroundColor: deepForest,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   elevation: 2,
                                 ).copyWith(
                                   overlayColor: WidgetStateProperty.resolveWith<Color?>(
                                     (Set<WidgetState> states) {
                                       if (states.contains(WidgetState.pressed)) {
-                                        return backgroundDark.withValues(alpha: 0.2);
-                                      }
-                                      if (states.contains(WidgetState.hovered)) {
-                                        return Colors.white.withValues(alpha: 0.2);
+                                        return harvestGold.withValues(alpha: 0.3);
                                       }
                                       return null;
                                     },
                                   ),
-                                  mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click),
+                                  mouseCursor: WidgetStateProperty.all(
+                                    SystemMouseCursors.click,
+                                  ),
                                 ),
                                 child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text("CREATE ACCOUNT",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16)),
+                                    Text(
+                                      "CREATE ACCOUNT",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                     SizedBox(width: 8),
                                     Icon(Icons.arrow_forward),
                                   ],
@@ -210,13 +278,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     child: RichText(
                       text: TextSpan(
                         text: "Already have an account? ",
-                        style: TextStyle(color: subTextColor),
-                        children: const [
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.6),
+                        ),
+                        children: [
                           TextSpan(
                             text: "Log In",
                             style: TextStyle(
-                                color: primaryColor,
-                                fontWeight: FontWeight.bold),
+                              color: subTextColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -240,31 +311,46 @@ class _RegistrationPageState extends State<RegistrationPage> {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 8),
-          Text(label,
-              style: TextStyle(
-                  color: color, fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String hint, Color textColor, {bool isPassword = false}) {
+  Widget _buildTextField(
+    String hint,
+    Color textColor,
+    bool dark, {
+    bool isPassword = false,
+  }) {
     return TextField(
       obscureText: isPassword,
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF3F3F46)),
+        hintStyle: TextStyle(color: dark ? Colors.white24 : Colors.black26),
         filled: true,
-        fillColor: textColor.withValues(alpha: 0.05),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        fillColor: dark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Colors.black.withValues(alpha: 0.05),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: textColor.withValues(alpha: 0.1)),
+          borderSide: const BorderSide(color: ironGrey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: primaryColor),
+          borderSide: const BorderSide(color: sproutGreen, width: 2),
         ),
       ),
     );

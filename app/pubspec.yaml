@@ -61,6 +61,7 @@ flutter:
     - assets/images/Register Background.jpg
     - assets/images/rice crop.jpg
     - assets/images/cotton crop.jpg
+    - assets/images/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
