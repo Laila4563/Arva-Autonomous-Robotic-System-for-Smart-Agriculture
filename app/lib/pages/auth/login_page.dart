@@ -13,14 +13,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A2010),
+      // Background: Deep Forest / Rich Bark
+      backgroundColor: const Color(0xFF0A150F), 
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: ConstrainedBox(
-                // This ensures the content at least fills the screen height
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Padding(
@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         // System Status Header
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -36,10 +36,10 @@ class _LoginPageState extends State<LoginPage> {
                             Row(
                               children: [
                                 Container(
-                                  width: 10,
-                                  height: 10,
+                                  width: 12,
+                                  height: 12,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF00FF00),
+                                    color: Color(0xFF88B04B), // Sprout Green
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -47,8 +47,8 @@ class _LoginPageState extends State<LoginPage> {
                                 const Text(
                                   'SYSTEM ONLINE',
                                   style: TextStyle(
-                                    color: Color(0xFF00FF00),
-                                    fontSize: 12,
+                                    color: Color(0xFF88B04B), // Sprout Green
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -56,43 +56,36 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const Text(
                               'V4.2.0-STABLE',
-                              style: TextStyle(
-                                color: Color(0xFF8A8A8A),
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: Color(0xFF546E7A), fontSize: 14), // Iron Grey
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 30),
 
-                        // Branded Logo (Circle and Border REMOVED)
+                        // Logo without circle/border
                         Center(
                           child: SizedBox(
-                            width: 107, // Slightly reduced to save space
-                            height: 107,
+                            width: 140, 
+                            height: 140,
                             child: Image.asset(
                               'assets/images/logo.png',
-                              fit:
-                                  BoxFit
-                                      .contain, // Contain ensures the logo isn't cropped
+                              fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(
                                   Icons.eco,
-                                  color: Color(0xFF00FF00),
+                                  color: Color(0xFF88B04B), // Sprout Green
                                   size: 80,
                                 );
                               },
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-
                         const Center(
                           child: Text(
                             'ARVA',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 28, // Scaled down slightly
+                              fontSize: 35,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
                             ),
@@ -102,17 +95,17 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'AUTONOMOUS SYSTEMS',
                             style: TextStyle(
-                              color: Color(0xFF00FF00),
-                              fontSize: 14,
+                              color: Color(0xFF56B9C7), // Sky Blue
+                              fontSize: 16,
                               letterSpacing: 2,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
 
-                        // Field Intel Card (Reduced height to save space)
+                        // Field Intel Card
                         Container(
-                          height: 100,
+                          height: 110,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             image: const DecorationImage(
@@ -121,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           child: Container(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               color: Colors.black.withValues(alpha: 0.4),
@@ -133,8 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Text(
                                   'FIELD INTEL ACTIVE',
                                   style: TextStyle(
-                                    color: Color(0xFF00FF00),
-                                    fontSize: 12,
+                                    color: Color(0xFFE69F21), // Harvest Gold
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -142,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                                   'Central Valley Sector-4',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -150,58 +142,51 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
 
                         // Email Field
-                        const Text(
-                          'Email',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        const Text('Email', style: TextStyle(color: Color(0xFF546E7A))), // Iron Grey Header
                         const SizedBox(height: 8),
                         TextField(
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: 'name@example.com',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFF5A5A5A),
-                            ),
+                            hintStyle: const TextStyle(color: Color(0xFF546E7A)),
                             filled: true,
-                            fillColor: const Color(0xFF0F2A15),
+                            fillColor: const Color(0xFF14241A),
                             prefixIcon: const Icon(
                               Icons.alternate_email,
-                              color: Color(0xFF00FF00),
+                              color: Color(0xFF88B04B), // Sprout Green Icon
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF1A3A20),
-                              ),
+                              borderSide: const BorderSide(color: Color(0xFF546E7A)), // Iron Grey Border
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Color(0xFF00FF00),
+                                color: Color(0xFF88B04B), // Sprout Green focus
                                 width: 2,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
 
                         // Password Field
-                        const Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Password',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            Text(
-                              'FORGOT?',
-                              style: TextStyle(
-                                color: Color(0xFF00FF00),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                            const Text('Password', style: TextStyle(color: Color(0xFF546E7A))), // Iron Grey Header
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Text(
+                                'FORGOT?',
+                                style: TextStyle(
+                                  color: Color(0xFF56B9C7), // Sky Blue
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],
@@ -212,100 +197,90 @@ class _LoginPageState extends State<LoginPage> {
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: '••••••••••••',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFF5A5A5A),
-                            ),
+                            hintStyle: const TextStyle(color: Color(0xFF546E7A)),
                             filled: true,
-                            fillColor: const Color(0xFF0F2A15),
+                            fillColor: const Color(0xFF14241A),
                             prefixIcon: const Icon(
                               Icons.lock,
-                              color: Color(0xFF00FF00),
+                              color: Color(0xFF88B04B), // Sprout Green Icon
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.grey,
+                                _obscureText ? Icons.visibility : Icons.visibility_off,
+                                color: const Color(0xFF546E7A),
                               ),
-                              onPressed:
-                                  () => setState(
-                                    () => _obscureText = !_obscureText,
-                                  ),
+                              onPressed: () => setState(() => _obscureText = !_obscureText),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF1A3A20),
-                              ),
+                              borderSide: const BorderSide(color: Color(0xFF546E7A)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Color(0xFF00FF00),
+                                color: Color(0xFF88B04B),
                                 width: 2,
                               ),
                             ),
                           ),
                         ),
+                        
+                        // This pushes the buttons to the bottom of the screen
+                        const Spacer(),
+                        const SizedBox(height: 24),
 
-                        // Flexible spacer pushes the button and signup link down
-                        const SizedBox(height: 20),
-
-                        // Login Button
+                        // Login Button (Authenticate)
                         ElevatedButton(
-                          onPressed:
-                              () => Navigator.pushReplacementNamed(
-                                context,
-                                '/user_dashboard',
-                              ),
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/user_dashboard');
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00FF00),
-                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFF88B04B), // Sprout Green
+                            foregroundColor: const Color(0xFF0A150F), // Dark Forest Text
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'LOGIN',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'LOGIN',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward, size: 18),
+                            ],
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
-                        // Register Link
+                        // Registration Link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
                               'Don\'t have an account? ',
-                              style: TextStyle(
-                                color: Color(0xFF8A8A8A),
-                                fontSize: 14,
-                              ),
+                              style: TextStyle(color: Color(0xFF546E7A), fontSize: 14),
                             ),
                             GestureDetector(
-                              onTap:
-                                  () =>
-                                      Navigator.pushNamed(context, '/register'),
+                              onTap: () {
+                                Navigator.pushNamed(context, '/register');
+                              },
                               child: const Text(
-                                'Sign Up',
+                                'Sign up',
                                 style: TextStyle(
-                                  color: Color(0xFF00FF00),
+                                  color: Color(0xFF56B9C7), // Sky Blue
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
