@@ -9,6 +9,7 @@ import 'pages/monitoring/pest_detection_page.dart';
 import 'pages/soil_analysis/soil_analysis_page.dart';
 import 'pages/recommendation/crop_recommendation_page.dart';
 import 'pages/treatment/irrigation_fertilization_page.dart';
+import 'pages/Landing Page/landing_page.dart';
 
 void main() {
   runApp(const App());
@@ -24,7 +25,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Arva Smart Agriculture',
       // Change this line to the route name you want to work on
-      initialRoute: '/plant_health',
+      initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
         '/register': (context) => const RegistrationPage(),
@@ -36,6 +37,7 @@ class App extends StatelessWidget {
         '/plant_health': (context) => const PlantHealthPage(),
         '/pest_detection': (context) => const PestDetectionPage(),
         '/irrigation_fertilization': (context) => const IrrigationFertilizationPage(),
+         '/landing_page': (context) => const LandingPage(),
       },
     );
   }
