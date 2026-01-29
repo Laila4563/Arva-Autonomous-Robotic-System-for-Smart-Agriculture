@@ -64,6 +64,11 @@ flutter:
     - assets/images/logo.png
     - assets/images/field.jpeg
     - assets/images/pest detection.jpg
+    - assets/images/apple scab leaf.jpg
+    - assets/images/strawberry leaf.jpg
+    - assets/images/Squash_Powdery_mildew_leaf.jpg
+    - assets/images/tomato leaf.jpg
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
