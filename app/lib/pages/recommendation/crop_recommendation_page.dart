@@ -11,14 +11,21 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   bool isLiveMode = true;
   bool isDarkMode = true;
 
-  final Color primaryGreen = const Color(0xFF13EC13);
+  // --- THEME COLORS (Synced Exactly with Registration Page) ---
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color skyBlue = Color(0xFF56B9C7);
+  static const Color skyBlueDark = Color(0xFF007A8A);
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color deepForest = Color(0xFF102210);
+  static const Color ironGrey = Color(0xFF546E7A);
+  static const Color backgroundLight = Color(0xFFF6F8F6);
 
-  // Dynamic Colors
-  Color get bgColor => isDarkMode ? const Color(0xFF060906) : const Color(0xFFF4F7F4);
-  Color get cardColor => isDarkMode ? const Color(0xFF111611) : Colors.white;
-  Color get textColor => isDarkMode ? Colors.white : const Color(0xFF1B221B);
-  Color get subTextColor => isDarkMode ? Colors.grey : const Color(0xFF5A6A5A);
-  Color get accentGreen => isDarkMode ? primaryGreen : const Color(0xFF008A00);
+
+  // Dynamic Color Getters
+  Color get bgColor => isDarkMode ? deepForest : backgroundLight;
+  Color get cardColor => isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white;
+  Color get textColor => isDarkMode ? Colors.white : deepForest;
+  Color get subTextColor => isDarkMode ? skyBlue : skyBlueDark;
 
   final Map<String, TextEditingController> _controllers = {
     "N": TextEditingController(text: "95"),
@@ -48,18 +55,32 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.precision_manufacturing, color: primaryGreen, size: 28),
-            const SizedBox(width: 10),
+            Image.asset(
+              'assets/images/logo.png',
+              height: 30,
+              errorBuilder: (context, error, stackTrace) => 
+                  const Icon(Icons.precision_manufacturing, color: sproutGreen),
+            ),
+            const SizedBox(width: 12),
             Text(
               "ARVA",
-              style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 4),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 3,
+              ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(isDarkMode ? Icons.wb_sunny : Icons.nightlight_round, color: primaryGreen, size: 20),
-            onPressed: () => setState(() => isDarkMode = !isDarkMode),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: _buildRoundButton(
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              textColor,
+              onTap: () => setState(() => isDarkMode = !isDarkMode),
+            ),
           ),
         ],
       ),
@@ -77,7 +98,6 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
 
             if (isLiveMode) ...[
               const SizedBox(height: 32),
-              // --- CROP 1: RICE ---
               _buildCropSection(
                 cropName: "RICE",
                 imagePath: "assets/images/rice crop.jpg",
@@ -89,7 +109,6 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                 growthCycle: "110 - 150 days",
               ),
               const SizedBox(height: 32),
-              // --- CROP 2: COTTON ---
               _buildCropSection(
                 cropName: "COTTON",
                 imagePath: "assets/images/cotton crop.jpg",
@@ -111,168 +130,117 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     );
   }
 
-  // --- Grouped Section (Banner + Card) ---
-  Widget _buildCropSection({
-    required String cropName,
-    required String imagePath,
-    required String season,
-    required String water,
-    required String soils,
-    required String sowing,
-    required String harvest,
-    required String growthCycle,
-  }) {
+  // --- UI COMPONENTS ---
+
+  Widget _buildCropSection({required String cropName, required String imagePath, required String season, required String water, required String soils, required String sowing, required String harvest, required String growthCycle}) {
     return Column(
       children: [
-        _buildCropBanner(cropName), 
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: sproutGreen,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: sproutGreen.withValues(alpha: 0.3), blurRadius: 10)],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("🌾", style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 12),
+              Text("RECOMMENDED: $cropName", style: const TextStyle(color: deepForest, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1)),
+            ],
+          ),
+        ),
         const SizedBox(height: 16),
-        _buildDetailedCropCard(
-          cropName: cropName,
-          imagePath: imagePath,
-          season: season,
-          water: water,
-          soils: soils,
-          sowing: sowing,
-          harvest: harvest,
-          growthCycle: growthCycle,
+        Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: ironGrey.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // STACK ADDED: Overlays the badge on the crop image
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    child: Image.asset(imagePath, height: 180, width: double.infinity, fit: BoxFit.cover),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: harvestGold, width: 1.5),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified, color: harvestGold, size: 14),
+                          SizedBox(width: 6),
+                          Text(
+                            "OPTIMAL MATCH FOUND",
+                            style: TextStyle(
+                              color: harvestGold  ,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildStyledRow("SEASON", season, "WATER", water),
+                    const SizedBox(height: 15),
+                    _buildStyledItem("SUITABLE SOILS", soils),
+                    const SizedBox(height: 15),
+                    _buildStyledRow("SOWING", sowing, "HARVEST", harvest),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(children: [const Icon(Icons.timer_outlined, color: sproutGreen, size: 18), const SizedBox(width: 8), Text("GROWTH CYCLE", style: TextStyle(color: subTextColor.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold))]),
+                          Text(growthCycle, style: const TextStyle(color: harvestGold, fontSize: 14, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  // --- Crop Banner UI ---
-  Widget _buildCropBanner(String name) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: primaryGreen,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: primaryGreen.withValues(alpha: 0.3), blurRadius: 20),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("🌾", style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 8),
-          Text(
-            "RECOMMENDED CROP: $name",
-            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 15),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- Detailed Card UI ---
-  Widget _buildDetailedCropCard({
-    required String cropName,
-    required String imagePath,
-    required String season,
-    required String water,
-    required String soils,
-    required String sowing,
-    required String harvest,
-    required String growthCycle,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 10))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                child: Image.asset(
-                  imagePath,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, e, s) => Container(
-                    height: 200,
-                    width: double.infinity,
-                    color: Colors.white.withValues(alpha: 0.05),
-                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: primaryGreen, width: 1.5),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.verified, color: primaryGreen, size: 16),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "OPTIMAL MATCH FOUND",
-                        style: TextStyle(color: Color(0xFF13EC13), fontSize: 11, fontWeight: FontWeight.w900),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStyledRow("EGYPTIAN SEASON", season, "WATER SOURCES", water),
-                const SizedBox(height: 20),
-                _buildStyledItem("SUITABLE SOILS", soils),
-                const SizedBox(height: 20),
-                _buildStyledRow("SOWING PERIOD", sowing, "HARVEST PERIOD", harvest),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.sync, color: primaryGreen, size: 22),
-                          const SizedBox(width: 12),
-                          Text("GROWTH CYCLE", style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                      Text(growthCycle, style: TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.w900)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- Switch Logic ---
   Widget _buildModeSwitch() {
     return Container(
       height: 55,
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ironGrey.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -290,37 +258,22 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         child: Container(
           margin: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: active ? (isDarkMode ? const Color(0xFF1A221A) : Colors.white) : Colors.transparent,
+            color: active ? (isDarkMode ? sproutGreen.withValues(alpha: 0.2) : sproutGreen) : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: active && !isDarkMode ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
           ),
           child: Center(
             child: Text(
-              label.toUpperCase(),
-              style: TextStyle(color: active ? accentGreen : subTextColor, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
+              label,
+              style: TextStyle(
+                color: active ? (isDarkMode ? sproutGreen : Colors.white) : subTextColor.withValues(alpha: 0.6),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSensorGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 3,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.1,
-      children: [
-        _buildSensorBox("NITROGEN (N)", _controllers["N"]!, "mg/kg"),
-        _buildSensorBox("PHOSPHOROUS (P)", _controllers["P"]!, "mg/kg"),
-        _buildSensorBox("POTASSIUM (K)", _controllers["K"]!, "mg/kg"),
-        _buildSensorBox("TEMP", _controllers["Temp"]!, "°C"),
-        _buildSensorBox("pH", _controllers["pH"]!, ""),
-        _buildSensorBox("HUMIDITY", _controllers["Humidity"]!, "%"),
-      ],
     );
   }
 
@@ -330,8 +283,10 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
-        border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.transparent),
+        border: Border.all(color: ironGrey.withValues(alpha: 0.2)),
+        boxShadow: isDarkMode ? [] : [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -343,9 +298,9 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(controller.text, style: TextStyle(color: accentGreen, fontSize: 23, fontWeight: FontWeight.bold)),
+                Text(controller.text, style: TextStyle(color: harvestGold, fontSize: 23, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 2),
-                Text(unit, style: TextStyle(color: accentGreen, fontSize: 8, fontWeight: FontWeight.w400)),
+                Text(unit, style: TextStyle(color: harvestGold, fontSize: 8, fontWeight: FontWeight.w400)),
               ],
             )
           else
@@ -353,13 +308,14 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
               controller: controller,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: accentGreen, fontSize: 23, fontWeight: FontWeight.bold),
+              style: TextStyle(color: harvestGold, fontSize: 23, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
                 suffixText: unit,
-                suffixStyle: TextStyle(color: accentGreen, fontSize: 8),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: accentGreen.withValues(alpha: 0.2))),
+                suffixStyle: const TextStyle(color: harvestGold, fontSize: 8),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: sproutGreen.withValues(alpha: 0.2))),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: sproutGreen)),
               ),
             ),
         ],
@@ -371,43 +327,48 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("ENVIRONMENTAL PARAMETERS", style: TextStyle(color: accentGreen, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-        if (isLiveMode) _buildSyncedBadge(),
+        const Text("ENVIRONMENTAL DATA", style: TextStyle(color: sproutGreen, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+        if (isLiveMode) Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: harvestGold.withValues(alpha: 0.5))),
+          child: const Row(children: [Icon(Icons.circle, color: harvestGold, size: 8), SizedBox(width: 6), Text("LIVE", style: TextStyle(color: harvestGold, fontSize: 9, fontWeight: FontWeight.bold))]),
+        ),
       ],
     );
   }
 
-  Widget _buildSyncedBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primaryGreen.withValues(alpha: 0.4)),
-        boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.circle, color: primaryGreen, size: 8),
-          const SizedBox(width: 6),
-          Text("SYNCED", style: TextStyle(color: accentGreen, fontSize: 9, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+  Widget _buildSensorGrid() {
+  return GridView.count(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    crossAxisCount: 3, // Change to 2 if you want larger manual input boxes
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 12,
+    childAspectRatio: isLiveMode ? 1.1 : 1.1, // Adjust height specifically for manual entry
+    children: [
+      _buildSensorBox("NITROGEN", _controllers["N"]!, "mg/kg"),
+      _buildSensorBox("PHOSPHORUS", _controllers["P"]!, "mg/kg"),
+      _buildSensorBox("POTASSIUM", _controllers["K"]!, "mg/kg"),
+      _buildSensorBox("TEMP", _controllers["Temp"]!, "°C"),
+      _buildSensorBox("pH", _controllers["pH"]!, ""),
+      _buildSensorBox("HUMIDITY", _controllers["Humidity"]!, "%"),
+    ],
+  );
+}
 
   Widget _buildManualActionButton() {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.black,
-        elevation: isDarkMode ? 0 : 4,
-        shadowColor: primaryGreen.withValues(alpha: 0.3),
-        minimumSize: const Size(double.infinity, 55),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: sproutGreen,
+          foregroundColor: deepForest,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: const Text("RECOMMEND A CROP", style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold, letterSpacing: 1)),
       ),
-      child: const Text("RECOMMEND A CROP", style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
     );
   }
 
@@ -418,14 +379,25 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   Widget _buildStyledItem(String label, String value) {
     return Container(
       padding: const EdgeInsets.only(left: 12),
-      decoration: BoxDecoration(border: Border(left: BorderSide(color: primaryGreen.withValues(alpha: 0.3), width: 2))),
+      decoration: const BoxDecoration(border: Border(left: BorderSide(color: ironGrey, width: 1))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: subTextColor, fontSize: 9, fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(color: subTextColor.withValues(alpha: 0.7), fontSize: 9, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w900)),
+          Text(value, style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40, width: 40,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.1), border: Border.all(color: color.withValues(alpha: 0.1))),
+        child: Icon(icon, color: color, size: 20),
       ),
     );
   }
