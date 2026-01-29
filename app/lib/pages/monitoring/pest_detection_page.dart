@@ -1,32 +1,53 @@
 import 'package:flutter/material.dart';
 
-class PestDetectionPage extends StatelessWidget {
+class PestDetectionPage extends StatefulWidget {
   const PestDetectionPage({super.key});
 
   @override
+  State<PestDetectionPage> createState() => _PestDetectionPageState();
+}
+
+class _PestDetectionPageState extends State<PestDetectionPage> {
+  bool isDarkMode = true;
+
+  // --- THEME COLORS (Matched to Registration Page) ---
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color skyBlue = Color(0xFF56B9C7); 
+  static const Color skyBlueDark = Color(0xFF007A8A); 
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color deepForest = Color(0xFF102210);
+  static const Color ironGrey = Color(0xFF546E7A);
+  static const Color backgroundLight = Color(0xFFF6F8F6);
+  static const Color alertHigh = Color(0xFFFF4D4D);
+
+  @override
   Widget build(BuildContext context) {
-    // Defining your custom Arva colors
-    const Color primaryGreen = Color(0xFF13EC13);
-    const Color backgroundDark = Color(0xFF102210);
-    const Color alertHigh = Color(0xFFFF4D4D);
+    // Dynamic colors based on theme state
+    final Color currentBg = isDarkMode ? deepForest : backgroundLight;
+    final Color textColor = isDarkMode ? Colors.white : deepForest;
+    final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
+    
+    // Updated with .withValues to fix deprecation
+    final Color cardColor = isDarkMode 
+        ? Colors.white.withValues(alpha: 0.05) 
+        : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
-      backgroundColor: backgroundDark,
+      backgroundColor: currentBg,
       appBar: AppBar(
-        backgroundColor: backgroundDark,
+        backgroundColor: currentBg,
         elevation: 0,
-        leading: const Icon(
-          Icons.arrow_back_ios,
-          color: Colors.white,
-          size: 20,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios, color: textColor, size: 20),
         ),
         centerTitle: true,
         title: Column(
           children: [
-            const Text(
+            Text(
               "Pest Detection",
               style: TextStyle(
-                color: Colors.white,
+                color: textColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -38,15 +59,15 @@ class PestDetectionPage extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: alertHigh,
+                    color: harvestGold,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Text(
+                Text(
                   "LIVE FEED - ARVA-04",
                   style: TextStyle(
-                    color: Colors.white60,
+                    color: subTextColor,
                     fontSize: 10,
                     letterSpacing: 1.2,
                   ),
@@ -56,9 +77,17 @@ class PestDetectionPage extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.sensors, color: Colors.white),
-            onPressed: () {},
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: _buildRoundButton(
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              textColor,
+              onTap: () {
+                setState(() {
+                  isDarkMode = !isDarkMode;
+                });
+              },
+            ),
           ),
         ],
       ),
@@ -66,73 +95,37 @@ class PestDetectionPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- IMAGE VIEWER SECTION (Empty State Placeholder) ---
+            // --- IMAGE VIEWER SECTION ---
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AspectRatio(
-                    aspectRatio: 4 / 5,
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 1 / 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black, // Dark empty background
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.black,
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: ironGrey.withValues(alpha: 0.5),
                         ),
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.bug_report_outlined,
-                          color: Colors.white.withValues(alpha: 0.1),
-                          size: 100,
-                        ),
+                      child: Image.asset(
+                        'assets/images/pest detection.jpg',
+                        fit: BoxFit.cover,
+                        alignment: const Alignment(-0.7, 0.0),
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Text(
+                              "Image not found",
+                              style: TextStyle(color: alertHigh),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
-                  // Detection Box
-                  Positioned(
-                    top: 80,
-                    left: 50,
-                    child: _buildAnomalyBox(alertHigh),
-                  ),
-                  // GPS & Status Overlay
-                  Positioned(
-                    top: 15,
-                    left: 15,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildStatusTag(
-                          "40.7128° N, 74.0060° W",
-                          primaryGreen,
-                          Icons.gps_fixed,
-                        ),
-                        const SizedBox(height: 5),
-                        _buildStatusTag(
-                          "ALT: 1.2m | SPD: 0.5m/s",
-                          Colors.white,
-                          null,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Center Focus Button
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.2),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                    ),
-                    child: const Icon(
-                      Icons.center_focus_strong,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -142,18 +135,18 @@ class PestDetectionPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Anomaly Detected",
+                  Text(
+                    "Pest Detected",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textColor,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     "Potential pest presence identified in Sector B-12",
                     style: TextStyle(
-                      color: primaryGreen.withValues(alpha: 0.7),
+                      color: sproutGreen,
                       fontSize: 14,
                     ),
                   ),
@@ -167,21 +160,21 @@ class PestDetectionPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  border: Border.all(color: ironGrey.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "CONFIDENCE",
-                      style: TextStyle(color: Colors.white60, fontSize: 12),
+                      style: TextStyle(color: subTextColor, fontSize: 12),
                     ),
-                    const Text(
-                      "98.4%",
+                    Text(
+                      "70%",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: textColor,
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -189,12 +182,12 @@ class PestDetectionPage extends StatelessWidget {
                     const SizedBox(height: 5),
                     const Row(
                       children: [
-                        Icon(Icons.verified, color: primaryGreen, size: 14),
+                        Icon(Icons.verified, color: sproutGreen, size: 14),
                         SizedBox(width: 4),
                         Text(
                           "Neural Core v4",
                           style: TextStyle(
-                            color: primaryGreen,
+                            color: sproutGreen,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -206,37 +199,37 @@ class PestDetectionPage extends StatelessWidget {
               ),
             ),
 
-            // --- ACTION CARD ---
+            // --- DETECTION ALERT CARD ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: primaryGreen.withValues(alpha: 0.05),
+                  color: alertHigh.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryGreen.withValues(alpha: 0.2)),
+                  border: Border.all(color: alertHigh.withValues(alpha: 0.3)),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.report, color: alertHigh, size: 20),
                         SizedBox(width: 8),
                         Text(
                           "Detection Alert",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: alertHigh,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      "A potential pest presence has been identified in the current field segment. Detection requires manual verification or drone deployment.",
+                      "A potential pest presence has been identified in the current field segment.",
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -245,105 +238,26 @@ class PestDetectionPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 120),
-          ],
-        ),
-      ),
-      bottomSheet: Container(
-        color: backgroundDark,
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.1),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Ignore",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 2,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.precision_manufacturing,
-                  color: backgroundDark,
-                ),
-                label: const Text(
-                  "DEPLOY DRONE",
-                  style: TextStyle(
-                    color: backgroundDark,
-                    fontWeight: FontWeight.w900, 
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAnomalyBox(Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), // FIXED py ERROR
-          color: color,
-          child: const Text(
-            "ANOMALY DETECTED",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+  // Updated Helper Widget with .withValues()
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            border: Border.all(color: color, width: 2),
-            color: color.withValues(alpha: 0.1),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusTag(String text, Color textColor, IconData? icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) Icon(icon, color: textColor, size: 12),
-          if (icon != null) const SizedBox(width: 5),
-          Text(text, style: TextStyle(color: textColor, fontSize: 10)),
-        ],
+        child: Icon(icon, color: color, size: 20),
       ),
     );
   }
