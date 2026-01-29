@@ -1,204 +1,231 @@
 import 'package:flutter/material.dart';
 
-class PlantHealthPage extends StatelessWidget {
+class PlantHealthPage extends StatefulWidget {
   const PlantHealthPage({super.key});
 
-  // Custom Color Palette matching the Login Theme
-  static const Color primaryGreen = Color(0xFF88B04B); // Sprout Green
-  static const Color backgroundDark = Color(0xFF0A120A); // Deep Forest
-  static const Color surfaceDark = Color(0xFF5D4037); // Rich Bark
-  static const Color charcoal = Color(0xFF546E7A); // Iron Grey
-  static const Color accentOrange = Color(0xFFE69F21); // Harvest Gold
-  static const Color skyBlue = Color(0xFF56B9C7); // Sky Blue
+  @override
+  State<PlantHealthPage> createState() => _PlantHealthPageState();
+}
+
+class _PlantHealthPageState extends State<PlantHealthPage> {
+  bool isDarkMode = true;
+
+  // --- ARVA THEME COLORS ---
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color deepForest = Color(0xFF0A120A);
+  static const Color ironGrey = Color(0xFF546E7A);
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color skyBlue = Color(0xFF56B9C7);
+  static const Color backgroundLight = Color(0xFFF6F8F6);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundDark,
-      appBar: AppBar(
-        // Updated to .withValues for the latest Flutter standard
-        backgroundColor: backgroundDark.withValues(alpha: 0.8),
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "Plant Health",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                "Disease Prevalence Analytics",
-                "Global Field View",
-              ),
-              const SizedBox(height: 12),
-              _buildMainAnalyticsCard(),
-              const SizedBox(height: 24),
-              _buildSectionHeader("Neural Analysis Feed", "Live Detection"),
-              const SizedBox(height: 12),
+    // Dynamic colors based on theme state
+    final Color currentBg = isDarkMode ? deepForest : backgroundLight;
+    final Color textColor = isDarkMode ? Colors.white : deepForest;
+    final Color cardColor = isDarkMode ? deepForest : Colors.white;
 
-              _buildAnalysisCard(
-                title: "Apple Scab Leaf",
-                status: "UNHEALTHY",
-                statusColor: accentOrange,
-                confidence: "Confidence: 89%",
-                location: "Lat: 42.36 | Long: -71.05",
-                imagePath: "assets/images/apple scab leaf.jpg",
-                hasAdvice: true,
-                adviceText:
-                    "Fungicide: Apply Myclobutanil within 24 hours and remove infected leaves to reduce spread.",
-              ),
-              const SizedBox(height: 16),
-              _buildAnalysisCard(
-                title: "Strawberry Leaf",
-                status: "HEALTHY",
-                statusColor: primaryGreen,
-                confidence: "Confidence: 83%",
-                location: "Lat: 42.36 | Long: -71.02",
-                imagePath: "assets/images/strawberry leaf.jpg",
-                hasAdvice: false,
-              ),
-              const SizedBox(height: 16),
-              _buildAnalysisCard(
-                title: "Squash Mildew Leaf",
-                status: "UNHEALTHY",
-                statusColor: accentOrange,
-                confidence: "Confidence: 81%",
-                location: "Lat: 42.38 | Long: -71.09",
-                imagePath: "assets/images/Squash_Powdery_mildew_leaf.jpg",
-                hasAdvice: true,
-                adviceText:
-                    "Treatment: Apply sulfur-based fungicide or potassium bicarbonate.",
-              ),
-              const SizedBox(height: 16),
-              _buildAnalysisCard(
-                title: "Tomato Leaf",
-                status: "HEALTHY",
-                statusColor: primaryGreen,
-                confidence: "Confidence: 94%",
-                location: "Lat: 42.37 | Long: -71.06",
-                imagePath: "assets/images/tomato leaf.jpg",
-                hasAdvice: false,
-              ),
-              const SizedBox(height: 32),
-            ],
+    return Scaffold(
+      backgroundColor: currentBg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- TOP BAR (Back Button + Theme Switch) ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // BACK BUTTON (Left Side)
+                      _buildRoundButton(
+                        Icons.arrow_back_ios_new,
+                        textColor,
+                        onTap: () {
+                          Navigator.pop(context); // Goes back to the previous page
+                        },
+                      ),
+                      // THEME TOGGLE (Right Side)
+                      _buildRoundButton(
+                        isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                        textColor,
+                        onTap: () {
+                          setState(() {
+                            isDarkMode = !isDarkMode;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    "Plant Health",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildSectionHeader("Disease Prevalence Analytics", textColor),
+                const SizedBox(height: 12),
+                _buildMainAnalyticsCard(cardColor, textColor),
+                
+                const SizedBox(height: 24),
+                _buildSectionHeader("Neural Analysis Feed", textColor),
+                const SizedBox(height: 12),
+
+                _buildAnalysisCard(
+                  title: "Apple Scab Leaf",
+                  status: "UNHEALTHY",
+                  statusColor: harvestGold,
+                  confidence: "Confidence: 89%",
+                  location: "Lat: 42.36 | Long: -71.05",
+                  imagePath: "assets/images/apple scab leaf.jpg",
+                  hasAdvice: true,
+                  adviceText: "Fungicide: Apply Myclobutanil within 24 hours.",
+                  cardColor: cardColor,
+                  textColor: textColor,
+                ),
+                const SizedBox(height: 16),
+                _buildAnalysisCard(
+                  title: "Strawberry Leaf",
+                  status: "HEALTHY",
+                  statusColor: sproutGreen,
+                  confidence: "Confidence: 83%",
+                  location: "Lat: 42.36 | Long: -71.02",
+                  imagePath: "assets/images/strawberry leaf.jpg",
+                  hasAdvice: false,
+                  cardColor: cardColor,
+                  textColor: textColor,
+                ),
+                const SizedBox(height: 16),
+                _buildAnalysisCard(
+                  title: "Squash Mildew Leaf",
+                  status: "UNHEALTHY",
+                  statusColor: harvestGold,
+                  confidence: "Confidence: 81%",
+                  location: "Lat: 42.38 | Long: -71.09",
+                  imagePath: "assets/images/Squash_Powdery_mildew_leaf.jpg",
+                  hasAdvice: true,
+                  adviceText: "Treatment: Apply sulfur-based fungicide.",
+                  cardColor: cardColor,
+                  textColor: textColor,
+                ),
+                const SizedBox(height: 16),
+                _buildAnalysisCard(
+                  title: "Tomato Leaf",
+                  status: "HEALTHY",
+                  statusColor: sproutGreen,
+                  confidence: "Confidence: 94%",
+                  location: "Lat: 42.37 | Long: -71.06",
+                  imagePath: "assets/images/tomato leaf.jpg",
+                  hasAdvice: false,
+                  cardColor: cardColor,
+                  textColor: textColor,
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle) {
+  // --- HELPER WIDGETS ---
+
+  // Reusable round button from your Registration UI
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          // Updated to new Flutter value standard
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, Color textColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold),
         ),
-        Text(
-          subtitle.toUpperCase(),
-          style: const TextStyle(
-            color: skyBlue,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
+        const Text(
+          "LIVE SYNC",
+          style: TextStyle(color: skyBlue, fontSize: 10, fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
 
-  Widget _buildMainAnalyticsCard() {
+  Widget _buildMainAnalyticsCard(Color cardColor, Color textColor) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: backgroundDark,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: charcoal),
+        border: Border.all(color: ironGrey.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: primaryGreen.withValues(alpha: 0.08),
+            color: sproutGreen.withValues(alpha: isDarkMode ? 0.08 : 0.2),
             blurRadius: 20,
-            spreadRadius: 2,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
-          _buildProgressBar("Healthy Population", 0.84, primaryGreen),
+          _buildProgressBar("Healthy Population", 0.84, sproutGreen, textColor),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildProgressBar(
-                  "Unhealthy Population",
-                  0.12,
-                  accentOrange,
-                  isSmall: true,
-                ),
-              ),
-            ],
-          ),
-          const Divider(color: charcoal, height: 32),
+          _buildProgressBar("Unhealthy Population", 0.12, harvestGold, textColor, isSmall: true),
+          const Divider(color: ironGrey, height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem("Incidence", "Low"),
-              _buildStatItem("Spread Rate", "-1.2%", color: accentOrange),
-              _buildStatItem("Risk Level", "Stable", color: primaryGreen),
+              _buildStatItem("INCIDENCE", "Low"),
+              _buildStatItem("SPREAD", "-1.2%", color: harvestGold),
+              _buildStatItem("RISK", "Stable", color: sproutGreen),
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildProgressBar(
-    String label,
-    double value,
-    Color color, {
-    bool isSmall = false,
-  }) {
+  Widget _buildProgressBar(String label, double value, Color color, Color textColor, {bool isSmall = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                color: color,
-                fontSize: isSmall ? 9 : 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "${(value * 100).toInt()}%",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(label.toUpperCase(), style: TextStyle(color: color, fontSize: isSmall ? 9 : 11, fontWeight: FontWeight.bold)),
+            Text("${(value * 100).toInt()}%", style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 4),
         LinearProgressIndicator(
           value: value,
-          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          backgroundColor: color.withValues(alpha: 0.1),
           color: color,
           minHeight: isSmall ? 6 : 8,
         ),
@@ -206,29 +233,11 @@ class PlantHealthPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(
-    String label,
-    String value, {
-    Color color = Colors.white,
-  }) {
+  Widget _buildStatItem(String label, String value, {Color color = skyBlue}) {
     return Column(
       children: [
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: skyBlue,
-            fontSize: 8,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: ironGrey, fontSize: 8, fontWeight: FontWeight.bold)),
+        Text(value, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -240,6 +249,8 @@ class PlantHealthPage extends StatelessWidget {
     required String confidence,
     required String location,
     required String imagePath,
+    required Color cardColor,
+    required Color textColor,
     bool hasAdvice = false,
     String adviceText = "",
   }) {
@@ -247,45 +258,28 @@ class PlantHealthPage extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: backgroundDark.withValues(alpha: 0.7),
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: statusColor.withValues(alpha: 0.4)),
             boxShadow: [
               BoxShadow(
                 color: statusColor.withValues(alpha: 0.1),
                 blurRadius: 12,
-                spreadRadius: 1,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 110,
-                height: 100,
+                width: 110, height: 100,
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(11),
-                    bottomLeft: Radius.circular(11),
-                  ),
+                  color: Colors.black.withValues(alpha: 0.05),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(11), bottomLeft: Radius.circular(11)),
                 ),
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(11),
-                    bottomLeft: Radius.circular(11),
-                  ),
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                      Icons.eco,
-                      color: Colors.white24,
-                      size: 40,
-                    ),
-                  ),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(11), bottomLeft: Radius.circular(11)),
+                  child: Image.asset(imagePath, fit: BoxFit.contain),
                 ),
               ),
               Expanded(
@@ -298,55 +292,20 @@ class PlantHealthPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              status,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black,
-                              ),
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(4)),
+                            child: Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.black)),
                           ),
-                          Text(
-                            confidence,
-                            style: TextStyle(
-                              color: statusColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
+                          Text(confidence, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w900)),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        location,
-                        style: const TextStyle(
-                          color: skyBlue,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text(title, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(location, style: const TextStyle(color: skyBlue, fontSize: 10, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
@@ -355,31 +314,19 @@ class PlantHealthPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: backgroundDark,
+              color: cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: accentOrange.withValues(alpha: 0.3)),
-              boxShadow: [
-                BoxShadow(color: accentOrange.withValues(alpha: 0.05), blurRadius: 8),
-              ],
+              border: Border.all(color: harvestGold.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.medical_services,
-                  color: accentOrange,
-                  size: 18,
-                ),
+                const Icon(Icons.medical_services, color: harvestGold, size: 18),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    adviceText,
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
-                ),
+                Expanded(child: Text(adviceText, style: TextStyle(color: textColor.withValues(alpha: 0.7), fontSize: 11))),
               ],
             ),
-          ),
-        ],
+          )
+        ]
       ],
     );
   }
