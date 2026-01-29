@@ -10,7 +10,7 @@ def main():
     model = YOLO("runs/segment/unified_agri_seg/weights/best.pt")
 
     # Path to your test image (downloaded from Google)
-    image_path = "test3.jpg"   # change if needed
+    image_path = "test images for prediction\strawberryleaf.png"   # change if needed
 
     # Run inference
     results = model.predict(
