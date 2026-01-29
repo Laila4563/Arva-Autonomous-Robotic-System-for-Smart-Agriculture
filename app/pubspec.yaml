@@ -62,11 +62,8 @@ flutter:
     - assets/images/rice crop.jpg
     - assets/images/cotton crop.jpg
     - assets/images/logo.png
-
-  # To add assets to your application, add an assets section, like this:
-  assets:
     - assets/images/field.jpeg
-    - assets/images/logo.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

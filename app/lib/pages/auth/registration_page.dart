@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart'; // Required for TapGestureRecognizer
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -14,18 +15,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
   // --- THEME COLORS ---
   static const Color sproutGreen = Color(0xFF88B04B);
   static const Color skyBlue = Color(0xFF56B9C7); // Good for Dark Mode
-  static const Color skyBlueDark = Color(0xFF007A8A); // Better contrast for Light Mode
+  static const Color skyBlueDark = Color(
+    0xFF007A8A,
+  ); // Better contrast for Light Mode
   static const Color harvestGold = Color(0xFFE69F21);
   static const Color deepForest = Color(0xFF102210);
   static const Color ironGrey = Color(0xFF546E7A);
-  static const Color backgroundLight = Color.fromARGB(255, 246, 248, 246); // Increased opacity for stability
+  static const Color backgroundLight = Color.fromARGB(
+    255,
+    246,
+    248,
+    246,
+  ); // Increased opacity for stability
 
   @override
   Widget build(BuildContext context) {
     // Dynamic colors based on theme state
     final Color currentBg = isDarkMode ? deepForest : backgroundLight;
     final Color textColor = isDarkMode ? Colors.white : deepForest;
-    
+
     // UPDATED: Now picks a darker blue for light mode so it doesn't disappear
     final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
 
@@ -65,47 +73,49 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Top Bar
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildRoundButton(Icons.arrow_back, textColor),
-                        Row(
-                          children: [
-                            _buildRoundButton(
-                              isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                              textColor,
-                              onTap: () {
-                                setState(() {
-                                  isDarkMode = !isDarkMode;
-                                });
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              height: 10,
-                              width: 10,
-                              decoration: const BoxDecoration(
-                                color: harvestGold,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              "SYSTEM ONLINE",
-                              style: TextStyle(
-                                color: sproutGreen,
-                                fontSize: 10,
-                                letterSpacing: 2,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Top Bar
+Padding(
+  padding: const EdgeInsets.symmetric(vertical: 20),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween, // This pushes items to far left and far right
+    children: [
+      // Left Side: System Status
+      Row(
+        children: [
+          Container(
+            height: 10,
+            width: 10,
+            decoration: const BoxDecoration(
+              color: harvestGold,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            "SYSTEM ONLINE",
+            style: TextStyle(
+              color: sproutGreen,
+              fontSize: 12,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+
+      // Right Side: Theme Toggle
+      _buildRoundButton(
+        isDarkMode ? Icons.light_mode : Icons.dark_mode,
+        textColor,
+        onTap: () {
+          setState(() {
+            isDarkMode = !isDarkMode;
+          });
+        },
+      ),
+    ],
+  ),
+),
 
                   // Logo Section
                   Row(
@@ -115,9 +125,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         width: 60,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.black.withValues(alpha: 0.05),
+                          color:
+                              isDarkMode
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : Colors.black.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
                             color: ironGrey.withValues(alpha: 0.5),
@@ -191,7 +202,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             _buildInputLabel(
                               Icons.person,
                               "Full Name",
-                              isDarkMode ? sproutGreen : sproutGreen, 
+                              isDarkMode ? sproutGreen : sproutGreen,
                             ),
                             _buildTextField(
                               "John Cooper",
@@ -239,14 +250,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                   ),
                                   elevation: 2,
                                 ).copyWith(
-                                  overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                                    (Set<WidgetState> states) {
-                                      if (states.contains(WidgetState.pressed)) {
-                                        return harvestGold.withValues(alpha: 0.3);
-                                      }
-                                      return null;
-                                    },
-                                  ),
+                                  overlayColor: WidgetStateProperty.resolveWith<
+                                    Color?
+                                  >((Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return harvestGold.withValues(alpha: 0.3);
+                                    }
+                                    return null;
+                                  }),
                                   mouseCursor: WidgetStateProperty.all(
                                     SystemMouseCursors.click,
                                   ),
@@ -280,14 +291,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         text: "Already have an account? ",
                         style: TextStyle(
                           color: textColor.withValues(alpha: 0.6),
+                          fontSize: 14,
                         ),
                         children: [
                           TextSpan(
-                            text: "Log In",
+                            text: "Login",
                             style: TextStyle(
                               color: subTextColor,
                               fontWeight: FontWeight.bold,
                             ),
+                            // This recognizer handles the click event
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // Navigate back to the Login Page
+                                    Navigator.pushNamed(context, '/');
+                                  },
                           ),
                         ],
                       ),
@@ -337,9 +356,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
         hintText: hint,
         hintStyle: TextStyle(color: dark ? Colors.white24 : Colors.black26),
         filled: true,
-        fillColor: dark
-            ? Colors.white.withValues(alpha: 0.03)
-            : Colors.black.withValues(alpha: 0.05),
+        fillColor:
+            dark
+                ? Colors.white.withValues(alpha: 0.03)
+                : Colors.black.withValues(alpha: 0.05),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

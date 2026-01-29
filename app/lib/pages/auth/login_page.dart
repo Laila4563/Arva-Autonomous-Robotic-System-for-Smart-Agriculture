@@ -9,12 +9,26 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
+  bool isDarkMode = true; 
+
+  // --- THEME COLORS ---
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color skyBlue = Color(0xFF56B9C7);
+  static const Color skyBlueDark = Color(0xFF007A8A); 
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color deepForest = Color(0xFF0A150F); 
+  static const Color ironGrey = Color(0xFF546E7A);
+  static const Color backgroundLight = Color.fromARGB(255, 246, 248, 246);
 
   @override
   Widget build(BuildContext context) {
+    final Color currentBg = isDarkMode ? deepForest : backgroundLight;
+    final Color textColor = isDarkMode ? Colors.white : deepForest;
+    final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
+    final Color fieldColor = isDarkMode ? const Color(0xFF14241A) : Colors.black.withValues(alpha: 0.05);
+
     return Scaffold(
-      // Background: Deep Forest / Rich Bark
-      backgroundColor: const Color(0xFF0A150F), 
+      backgroundColor: currentBg, 
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -29,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 20),
-                        // System Status Header
+                        // System Status Header & Theme Toggle
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -39,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
                                   width: 12,
                                   height: 12,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF88B04B), // Sprout Green
+                                    color: sproutGreen,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -47,22 +61,27 @@ class _LoginPageState extends State<LoginPage> {
                                 const Text(
                                   'SYSTEM ONLINE',
                                   style: TextStyle(
-                                    color: Color(0xFF88B04B), // Sprout Green
-                                    fontSize: 14,
+                                    color: sproutGreen,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
                             ),
-                            const Text(
-                              'V4.2.0-STABLE',
-                              style: TextStyle(color: Color(0xFF546E7A), fontSize: 14), // Iron Grey
+                            _buildRoundButton(
+                              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                              isDarkMode ? Colors.white : deepForest,
+                              onTap: () {
+                                setState(() {
+                                  isDarkMode = !isDarkMode;
+                                });
+                              },
                             ),
                           ],
                         ),
-                        const SizedBox(height: 30),
+                        // const SizedBox(height: 30),
 
-                        // Logo without circle/border
+                        // Logo (Fixed: Tint removed to preserve original colors)
                         Center(
                           child: SizedBox(
                             width: 140, 
@@ -73,29 +92,29 @@ class _LoginPageState extends State<LoginPage> {
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(
                                   Icons.eco,
-                                  color: Color(0xFF88B04B), // Sprout Green
+                                  color: sproutGreen,
                                   size: 80,
                                 );
                               },
                             ),
                           ),
                         ),
-                        const Center(
+                        Center(
                           child: Text(
                             'ARVA',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: textColor,
                               fontSize: 35,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
                             ),
                           ),
                         ),
-                        const Center(
+                        Center(
                           child: Text(
                             'AUTONOMOUS SYSTEMS',
                             style: TextStyle(
-                              color: Color(0xFF56B9C7), // Sky Blue
+                              color: subTextColor,
                               fontSize: 16,
                               letterSpacing: 2,
                             ),
@@ -124,17 +143,17 @@ class _LoginPageState extends State<LoginPage> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
-                                  'FIELD INTEL ACTIVE',
+                                  'FARM OVERVIEW',
                                   style: TextStyle(
-                                    color: Color(0xFFE69F21), // Harvest Gold
+                                    color: harvestGold,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  'Central Valley Sector-4',
+                                  'Agriculture Management System',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -145,27 +164,27 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 20),
 
                         // Email Field
-                        const Text('Email', style: TextStyle(color: Color(0xFF546E7A))), // Iron Grey Header
+                        Text('Email', style: TextStyle(color: isDarkMode ? ironGrey : ironGrey.withValues(alpha: 0.8))),
                         const SizedBox(height: 8),
                         TextField(
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: textColor),
                           decoration: InputDecoration(
                             hintText: 'name@example.com',
-                            hintStyle: const TextStyle(color: Color(0xFF546E7A)),
+                            hintStyle: TextStyle(color: isDarkMode ? ironGrey : Colors.black26),
                             filled: true,
-                            fillColor: const Color(0xFF14241A),
+                            fillColor: fieldColor,
                             prefixIcon: const Icon(
                               Icons.alternate_email,
-                              color: Color(0xFF88B04B), // Sprout Green Icon
+                              color: sproutGreen,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFF546E7A)), // Iron Grey Border
+                              borderSide: BorderSide(color: isDarkMode ? ironGrey : ironGrey.withValues(alpha: 0.3)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Color(0xFF88B04B), // Sprout Green focus
+                                color: sproutGreen,
                                 width: 2,
                               ),
                             ),
@@ -177,13 +196,13 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Password', style: TextStyle(color: Color(0xFF546E7A))), // Iron Grey Header
+                            Text('Password', style: TextStyle(color: isDarkMode ? ironGrey : ironGrey.withValues(alpha: 0.8))),
                             GestureDetector(
                               onTap: () {},
-                              child: const Text(
+                              child: Text(
                                 'FORGOT?',
                                 style: TextStyle(
-                                  color: Color(0xFF56B9C7), // Sky Blue
+                                  color: subTextColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
                                 ),
@@ -194,49 +213,48 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 8),
                         TextField(
                           obscureText: _obscureText,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: textColor),
                           decoration: InputDecoration(
                             hintText: '••••••••••••',
-                            hintStyle: const TextStyle(color: Color(0xFF546E7A)),
+                            hintStyle: TextStyle(color: isDarkMode ? ironGrey : Colors.black26),
                             filled: true,
-                            fillColor: const Color(0xFF14241A),
+                            fillColor: fieldColor,
                             prefixIcon: const Icon(
                               Icons.lock,
-                              color: Color(0xFF88B04B), // Sprout Green Icon
+                              color: sproutGreen,
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText ? Icons.visibility : Icons.visibility_off,
-                                color: const Color(0xFF546E7A),
+                                color: ironGrey,
                               ),
                               onPressed: () => setState(() => _obscureText = !_obscureText),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFF546E7A)),
+                              borderSide: BorderSide(color: isDarkMode ? ironGrey : ironGrey.withValues(alpha: 0.3)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Color(0xFF88B04B),
+                                color: sproutGreen,
                                 width: 2,
                               ),
                             ),
                           ),
                         ),
                         
-                        // This pushes the buttons to the bottom of the screen
                         const Spacer(),
                         const SizedBox(height: 24),
 
-                        // Login Button (Authenticate)
+                        // Login Button
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacementNamed(context, '/user_dashboard');
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF88B04B), // Sprout Green
-                            foregroundColor: const Color(0xFF0A150F), // Dark Forest Text
+                            backgroundColor: sproutGreen,
+                            foregroundColor: isDarkMode ? deepForest : Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -261,18 +279,18 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               'Don\'t have an account? ',
-                              style: TextStyle(color: Color(0xFF546E7A), fontSize: 14),
+                              style: TextStyle(color: isDarkMode ? ironGrey : Colors.black54, fontSize: 14),
                             ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.pushNamed(context, '/register');
                               },
-                              child: const Text(
+                              child: Text(
                                 'Sign up',
                                 style: TextStyle(
-                                  color: Color(0xFF56B9C7), // Sky Blue
+                                  color: subTextColor,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -289,6 +307,22 @@ class _LoginPageState extends State<LoginPage> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
+        ),
+        child: Icon(icon, color: color, size: 20),
       ),
     );
   }
