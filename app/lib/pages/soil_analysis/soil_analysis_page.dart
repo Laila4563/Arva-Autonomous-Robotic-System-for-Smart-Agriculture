@@ -1,32 +1,54 @@
 import 'package:flutter/material.dart';
+// import 'dart:ui' as ui;
+
+// Global color palette to ensure all classes can access them
+class AppColors {
+  static const Color sproutGreen = Color(0xFF88B04B);
+  static const Color skyBlue = Color(0xFF56B9C7);
+  static const Color harvestGold = Color(0xFFE69F21);
+  static const Color deepForest = Color(0xFF0A150F);
+  static const Color ironGrey = Color(0xFF546E7A);
+}
 
 class SoilAnalysisPage extends StatelessWidget {
   const SoilAnalysisPage({super.key});
 
-  // Color Palette Definitions
-  static const Color sproutGreen = Color(0xFF88B04B);
-  static const Color skyBlue = Color(0xFF56B9C7);
-  static const Color harvestGold = Color(0xFFE69F21);
-  static const Color deepForest = Color(0xFF0A150F); 
-  static const Color richBark = Color(0xFF5D4037);  
-  static const Color ironGrey = Color(0xFF546E7A);  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: deepForest,
+      backgroundColor: AppColors.deepForest,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: sproutGreen),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.sproutGreen),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Soil Analysis',
           style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0, top: 8.0, bottom: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.sproutGreen.withValues(alpha: 0.5), width: 1),
+              ),
+              child: TextButton.icon(
+                onPressed: () => print("Exporting..."),
+                icon: const Icon(Icons.download, color: AppColors.sproutGreen, size: 18),
+                label: const Text(
+                  'EXPORT',
+                  style: TextStyle(color: AppColors.sproutGreen, fontWeight: FontWeight.bold, fontSize: 11),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -41,16 +63,16 @@ class SoilAnalysisPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: richBark.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: ironGrey.withValues(alpha: 0.2)),
+                  color: Colors.white.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Column(
                   children: [
-                    _buildOverviewBar('Nutrients', 0.85, sproutGreen),
-                    _buildOverviewBar('pH Balance', 0.68, harvestGold),
-                    _buildOverviewBar('Moisture', 0.45, skyBlue),
-                    _buildOverviewBar('Conductivity', 0.30, ironGrey),
+                    _buildOverviewBar('Nutrients', 0.85, AppColors.sproutGreen),
+                    _buildOverviewBar('pH Balance', 0.68, AppColors.harvestGold),
+                    _buildOverviewBar('Moisture', 0.45, AppColors.skyBlue),
+                    _buildOverviewBar('Conductivity', 0.30, AppColors.ironGrey),
                   ],
                 ),
               ),
@@ -61,11 +83,11 @@ class SoilAnalysisPage extends StatelessWidget {
               
               Row(
                 children: [
-                  Expanded(child: NutrientCard(label: 'NITROGEN', value: '42', unit: 'mg/kg', color: sproutGreen)),
+                  const Expanded(child: NutrientCard(label: 'NITROGEN', value: '42', unit: 'mg/kg', color: AppColors.sproutGreen)),
                   const SizedBox(width: 10),
-                  Expanded(child: NutrientCard(label: 'PHOSPHORUS', value: '18', unit: 'mg/kg', color: harvestGold)),
+                  const Expanded(child: NutrientCard(label: 'PHOSPHORUS', value: '18', unit: 'mg/kg', color: AppColors.harvestGold)),
                   const SizedBox(width: 10),
-                  Expanded(child: NutrientCard(label: 'POTASSIUM', value: '156', unit: 'mg/kg', color: skyBlue)),
+                  const Expanded(child: NutrientCard(label: 'POTASSIUM', value: '156', unit: 'mg/kg', color: AppColors.skyBlue)),
                 ],
               ),
 
@@ -73,7 +95,6 @@ class SoilAnalysisPage extends StatelessWidget {
               const SectionHeader(title: 'Soil pH & Moisture', icon: Icons.water_drop),
               const SizedBox(height: 15),
 
-              // Updated pH Balance Card to match image
               InfoCard(
                 child: Column(
                   children: [
@@ -84,15 +105,15 @@ class SoilAnalysisPage extends StatelessWidget {
                         RichText(
                           text: const TextSpan(
                             children: [
-                              TextSpan(text: '6.8 ', style: TextStyle(color: sproutGreen, fontSize: 20, fontWeight: FontWeight.bold)),
-                              TextSpan(text: 'Neutral', style: TextStyle(color: ironGrey, fontSize: 14)),
+                              TextSpan(text: '6.8 ', style: TextStyle(color: AppColors.sproutGreen, fontSize: 20, fontWeight: FontWeight.bold)),
+                              TextSpan(text: 'Neutral', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
                             ]
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const PHSlider(phValue: 6.8), // Now takes actual pH value 0-14
+                    const PHSlider(phValue: 6.8), 
                   ],
                 ),
               ),
@@ -106,8 +127,8 @@ class SoilAnalysisPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Volumetric Water Content', style: TextStyle(color: ironGrey, fontSize: 14)),
-                        Text('32% Optimal', style: TextStyle(color: sproutGreen, fontWeight: FontWeight.bold)),
+                        Text('Volumetric Water Content', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
+                        Text('32% Optimal', style: TextStyle(color: AppColors.sproutGreen, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     SizedBox(height: 15),
@@ -118,7 +139,7 @@ class SoilAnalysisPage extends StatelessWidget {
 
               const SizedBox(height: 15),
 
-              Row(
+              const Row(
                 children: [
                   Expanded(
                     child: InfoCard(
@@ -127,18 +148,18 @@ class SoilAnalysisPage extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.thermostat, color: harvestGold, size: 16),
-                              const SizedBox(width: 4),
-                              const Text('Soil Temp', style: TextStyle(color: ironGrey, fontSize: 14)),
+                              Icon(Icons.thermostat, color: AppColors.harvestGold, size: 16),
+                              SizedBox(width: 4),
+                              Text('Soil Temp', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          const Text('24.2°C', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 8),
+                          Text('24.2°C', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
                   Expanded(
                     child: InfoCard(
                       child: Column(
@@ -146,13 +167,13 @@ class SoilAnalysisPage extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.bolt, color: skyBlue, size: 16),
-                              const SizedBox(width: 4),
-                              const Text('Conductivity', style: TextStyle(color: ironGrey, fontSize: 14)),
+                              Icon(Icons.bolt, color: AppColors.skyBlue, size: 16),
+                              SizedBox(width: 4),
+                              Text('Conductivity', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          const Text('1.2 dS/m', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 8),
+                          Text('1.2 dS/m', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -162,22 +183,34 @@ class SoilAnalysisPage extends StatelessWidget {
 
               const SizedBox(height: 40),
               
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/irrigation_fertilization'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: sproutGreen,
-                  foregroundColor: deepForest,
-                  minimumSize: const Size(double.infinity, 60),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.precision_manufacturing),
-                    SizedBox(width: 12),
-                    Text('TREAT DEFICIENCIES', 
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(color: AppColors.sproutGreen.withValues(alpha: 0.2), blurRadius: 20, spreadRadius: -5),
                   ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pushNamed(context, '/irrigation_fertilization'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.sproutGreen.withValues(alpha: 0.8),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.precision_manufacturing),
+                      SizedBox(width: 12),
+                      Text('TREAT DEFICIENCIES', 
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 30), 
@@ -190,7 +223,7 @@ class SoilAnalysisPage extends StatelessWidget {
 
   Widget _buildOverviewBar(String label, double value, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -201,13 +234,32 @@ class SoilAnalysisPage extends StatelessWidget {
               Text('${(value * 100).toInt()}%', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
-          const SizedBox(height: 6),
-          LinearProgressIndicator(
-            value: value,
-            backgroundColor: ironGrey.withValues(alpha: 0.1),
-            color: color.withValues(alpha: 0.4),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: value,
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    boxShadow: [
+                      BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 1),
+                    ],
+                    gradient: LinearGradient(
+                      colors: [color.withValues(alpha: 0.8), color.withValues(alpha: 0.4)],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -215,10 +267,10 @@ class SoilAnalysisPage extends StatelessWidget {
   }
 }
 
-// --- Custom Components ---
+// --- Custom Components (Now accessing AppColors globally) ---
 
 class PHSlider extends StatelessWidget {
-  final double phValue; // Value between 0 and 14
+  final double phValue;
   const PHSlider({super.key, required this.phValue});
 
   @override
@@ -228,35 +280,28 @@ class PHSlider extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            // Segmented Track
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                height: 12,
-                width: double.infinity,
-                child: Row(
-                  children: [
-                    Expanded(flex: 7, child: Container(color: Colors.redAccent.withOpacity(0.6))),
-                    Expanded(flex: 3, child: Container(color: Colors.greenAccent)),
-                    Expanded(flex: 4, child: Container(color: Colors.blueAccent.withOpacity(0.6))),
-                  ],
+            Container(
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Colors.redAccent, Colors.greenAccent, Colors.blueAccent],
                 ),
               ),
             ),
-            // The Indicator Bar
             LayoutBuilder(
               builder: (context, constraints) {
                 double position = (phValue / 14) * constraints.maxWidth;
                 return Positioned(
-                  left: position - 2,
+                  left: position - 4,
                   child: Container(
                     height: 24,
-                    width: 4,
+                    width: 8,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(4),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 4)
+                        BoxShadow(color: Colors.white.withValues(alpha: 0.8), blurRadius: 12),
                       ]
                     ),
                   ),
@@ -265,17 +310,34 @@ class PHSlider extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        // Labels below the bar
+        const SizedBox(height: 12),
         const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('ACIDIC (0)', style: TextStyle(color: Color(0xFF546E7A), fontSize: 10, fontWeight: FontWeight.bold)),
-            Text('NEUTRAL (7)', style: TextStyle(color: Color(0xFF546E7A), fontSize: 10, fontWeight: FontWeight.bold)),
-            Text('ALKALINE (14)', style: TextStyle(color: Color(0xFF546E7A), fontSize: 10, fontWeight: FontWeight.bold)),
+            Text('ACIDIC', style: TextStyle(color: AppColors.ironGrey, fontSize: 10, fontWeight: FontWeight.bold)),
+            Text('NEUTRAL', style: TextStyle(color: AppColors.ironGrey, fontSize: 10, fontWeight: FontWeight.bold)),
+            Text('ALKALINE', style: TextStyle(color: AppColors.ironGrey, fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         )
       ],
+    );
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  final Widget child;
+  const InfoCard({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: child,
     );
   }
 }
@@ -290,13 +352,13 @@ class NutrientCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF5D4037).withValues(alpha: 0.2),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
-          Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+          Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -305,29 +367,11 @@ class NutrientCard extends StatelessWidget {
             children: [
               Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(width: 2),
-              Text(unit, style: const TextStyle(color: Color(0xFF546E7A), fontSize: 11)),
+              Text(unit, style: const TextStyle(color: AppColors.ironGrey, fontSize: 10)),
             ],
           ),
         ],
       ),
-    );
-  }
-}
-
-class InfoCard extends StatelessWidget {
-  final Widget child;
-  const InfoCard({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF5D4037).withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF546E7A).withValues(alpha: 0.2)),
-      ),
-      child: child,
     );
   }
 }
@@ -341,12 +385,9 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFF88B04B), size: 18),
+        Icon(icon, color: AppColors.sproutGreen, size: 18),
         const SizedBox(width: 8),
-        Text(
-          title, 
-          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)
-        ),
+        Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -362,12 +403,11 @@ class MoistureIndicator extends StatelessWidget {
       children: List.generate(8, (index) => Expanded(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 2),
-          height: 16,
+          height: 12,
           decoration: BoxDecoration(
-            color: index < level 
-                ? const Color(0xFF88B04B) 
-                : const Color(0xFF546E7A).withValues(alpha: 0.1),
+            color: index < level ? AppColors.sproutGreen : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(2),
+            boxShadow: index < level ? [BoxShadow(color: AppColors.sproutGreen.withValues(alpha: 0.3), blurRadius: 4)] : [],
           ),
         ),
       )),
