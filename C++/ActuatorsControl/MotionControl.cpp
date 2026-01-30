@@ -1,11 +1,18 @@
 #include "MotionControl.h"
 
-MotionControl::MotionControl(Motor& left, Motor& right, MPU6050& sensor)
-    : leftMotor(left), rightMotor(right), sensor(sensor), onFinish(nullptr) {
+MotionControl::MotionControl(Motor& left, Motor& right, MPU6050& sensor, ActuatorPwm& SpeedControl)
+    : leftMotor(left), rightMotor(right), sensor(sensor),speedControl(SpeedControl), onFinish(nullptr) {
 }
 
 void MotionControl::setOnFinish(std::function<void(float)> callback) {
     onFinish = callback;
+}
+
+unsigned long MotionControl::micros()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+    return static_cast<unsigned long>(us);
 }
 
 void MotionControl::turn(float angle) {
@@ -70,6 +77,5 @@ void MotionControl::stop() {
 }
 
 void MotionControl::setSpeed(float percentage) {
-    leftMotor.setSpeed(percentage);
-    rightMotor.setSpeed(percentage);
+    speedControl.setIntensity(percentage);
 }
