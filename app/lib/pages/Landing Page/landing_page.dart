@@ -21,7 +21,7 @@ class _LandingPageState extends State<LandingPage>
   static const Color skyBlueDark = Color(0xFF007A8A);
   static const Color harvestGold = Color(0xFFE69F21);
   static const Color deepForest = Color(0xFF1A1D15);
-  static const Color richBark = Color(0xFF5D4037);
+  // static const Color richBark = Color(0xFF5D4037);
   static const Color ironGrey = Color(0xFF546E7A);
   static const Color backgroundLight = Color(0xFFF6F8F6);
 
