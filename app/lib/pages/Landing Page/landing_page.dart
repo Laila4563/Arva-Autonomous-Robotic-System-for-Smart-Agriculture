@@ -53,18 +53,17 @@ class _LandingPageState extends State<LandingPage>
       appBar: AppBar(
         backgroundColor: currentBg.withValues(alpha: 0.8),
         elevation: 0,
-        leading: const Icon(Icons.menu, color: primaryGreen, size: 30),
+        // The "leading" icon property was removed from here
         title: Text(
           "ARVA",
           style: TextStyle(
-            color: isDarkMode ? ironGrey : deepForest,
+            color: isDarkMode ? Colors.white : deepForest,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
           ),
         ),
         centerTitle: true,
         actions: [
-          // --- THEME TOGGLE SWITCH ---
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             color: isDarkMode ? Colors.white70 : deepForest,

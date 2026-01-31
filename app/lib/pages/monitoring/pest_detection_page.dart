@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/components/user_navbar.dart'; // Ensure this import is correct
 
 class PestDetectionPage extends StatefulWidget {
   const PestDetectionPage({super.key});
@@ -27,7 +28,6 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
     final Color textColor = isDarkMode ? Colors.white : deepForest;
     final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
     
-    // Updated with .withValues to fix deprecation
     final Color cardColor = isDarkMode 
         ? Colors.white.withValues(alpha: 0.05) 
         : Colors.black.withValues(alpha: 0.05);
@@ -35,14 +35,26 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
     return Scaffold(
       backgroundColor: currentBg,
       appBar: AppBar(
-        backgroundColor: currentBg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios, color: textColor, size: 20),
-        ),
         centerTitle: true,
+        // FIXED: Leading widget now uses the round button style for consistency
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildRoundButton(
+            Icons.arrow_back_ios_new,
+            textColor,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserNavbar()),
+              );
+            },
+          ),
+        ),
+        // CENTERED TITLE WITH LIVE FEED STATUS
         title: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               "Pest Detection",
@@ -245,7 +257,6 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
     );
   }
 
-  // Updated Helper Widget with .withValues()
   Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -257,7 +268,7 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
           color: color.withValues(alpha: 0.1),
           border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: Icon(icon, color: color, size: 18), // Reduced size to match others
       ),
     );
   }

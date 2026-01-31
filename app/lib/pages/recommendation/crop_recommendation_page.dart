@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/components/user_navbar.dart'; // Ensure this import is correct for your project
 
 class CropRecommendationPage extends StatefulWidget {
   const CropRecommendationPage({super.key});
@@ -11,7 +12,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   bool isLiveMode = true;
   bool isDarkMode = true;
 
-  // --- THEME COLORS (Synced Exactly with Registration Page) ---
+  // --- THEME COLORS ---
   static const Color sproutGreen = Color(0xFF88B04B);
   static const Color skyBlue = Color(0xFF56B9C7);
   static const Color skyBlueDark = Color(0xFF007A8A);
@@ -19,7 +20,6 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
   static const Color deepForest = Color(0xFF102210);
   static const Color ironGrey = Color(0xFF546E7A);
   static const Color backgroundLight = Color(0xFFF6F8F6);
-
 
   // Dynamic Color Getters
   Color get bgColor => isDarkMode ? deepForest : backgroundLight;
@@ -52,13 +52,27 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        // FIXED: Added Exactly the same Back Arrow logic as Soil Analysis
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildRoundButton(
+            Icons.arrow_back_ios_new,
+            textColor,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserNavbar()),
+              );
+            },
+          ),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               'assets/images/logo.png',
               height: 30,
-              errorBuilder: (context, error, stackTrace) => 
+              errorBuilder: (context, error, stackTrace) =>
                   const Icon(Icons.precision_manufacturing, color: sproutGreen),
             ),
             const SizedBox(width: 12),
@@ -95,7 +109,6 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
             _buildSectionHeader(),
             const SizedBox(height: 16),
             _buildSensorGrid(),
-
             if (isLiveMode) ...[
               const SizedBox(height: 32),
               _buildCropSection(
@@ -132,7 +145,16 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
 
   // --- UI COMPONENTS ---
 
-  Widget _buildCropSection({required String cropName, required String imagePath, required String season, required String water, required String soils, required String sowing, required String harvest, required String growthCycle}) {
+  Widget _buildCropSection({
+    required String cropName,
+    required String imagePath,
+    required String season,
+    required String water,
+    required String soils,
+    required String sowing,
+    required String harvest,
+    required String growthCycle,
+  }) {
     return Column(
       children: [
         Container(
@@ -141,14 +163,24 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
           decoration: BoxDecoration(
             color: sproutGreen,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: sproutGreen.withValues(alpha: 0.3), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(color: sproutGreen.withValues(alpha: 0.3), blurRadius: 10)
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text("🌾", style: TextStyle(fontSize: 20)),
               const SizedBox(width: 12),
-              Text("RECOMMENDED: $cropName", style: const TextStyle(color: deepForest, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1)),
+              Text(
+                "RECOMMENDED: $cropName",
+                style: const TextStyle(
+                  color: deepForest,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  letterSpacing: 1,
+                ),
+              ),
             ],
           ),
         ),
@@ -162,7 +194,6 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // STACK ADDED: Overlays the badge on the crop image
               Stack(
                 children: [
                   ClipRRect(
@@ -187,7 +218,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                           Text(
                             "OPTIMAL MATCH FOUND",
                             style: TextStyle(
-                              color: harvestGold  ,
+                              color: harvestGold,
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
@@ -219,7 +250,20 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(children: [const Icon(Icons.timer_outlined, color: sproutGreen, size: 18), const SizedBox(width: 8), Text("GROWTH CYCLE", style: TextStyle(color: subTextColor.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold))]),
+                          Row(
+                            children: [
+                              const Icon(Icons.timer_outlined, color: sproutGreen, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                "GROWTH CYCLE",
+                                style: TextStyle(
+                                  color: subTextColor.withValues(alpha: 0.7),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          ),
                           Text(growthCycle, style: const TextStyle(color: harvestGold, fontSize: 14, fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -328,33 +372,38 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text("ENVIRONMENTAL DATA", style: TextStyle(color: sproutGreen, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-        if (isLiveMode) Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: harvestGold.withValues(alpha: 0.5))),
-          child: const Row(children: [Icon(Icons.circle, color: harvestGold, size: 8), SizedBox(width: 6), Text("LIVE", style: TextStyle(color: harvestGold, fontSize: 9, fontWeight: FontWeight.bold))]),
-        ),
+        if (isLiveMode)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: harvestGold.withValues(alpha: 0.5))),
+            child: const Row(children: [
+              Icon(Icons.circle, color: harvestGold, size: 8),
+              SizedBox(width: 6),
+              Text("LIVE", style: TextStyle(color: harvestGold, fontSize: 9, fontWeight: FontWeight.bold))
+            ]),
+          ),
       ],
     );
   }
 
   Widget _buildSensorGrid() {
-  return GridView.count(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    crossAxisCount: 3, // Change to 2 if you want larger manual input boxes
-    crossAxisSpacing: 12,
-    mainAxisSpacing: 12,
-    childAspectRatio: isLiveMode ? 1.1 : 1.1, // Adjust height specifically for manual entry
-    children: [
-      _buildSensorBox("NITROGEN", _controllers["N"]!, "mg/kg"),
-      _buildSensorBox("PHOSPHORUS", _controllers["P"]!, "mg/kg"),
-      _buildSensorBox("POTASSIUM", _controllers["K"]!, "mg/kg"),
-      _buildSensorBox("TEMP", _controllers["Temp"]!, "°C"),
-      _buildSensorBox("pH", _controllers["pH"]!, ""),
-      _buildSensorBox("HUMIDITY", _controllers["Humidity"]!, "%"),
-    ],
-  );
-}
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.1,
+      children: [
+        _buildSensorBox("NITROGEN", _controllers["N"]!, "mg/kg"),
+        _buildSensorBox("PHOSPHORUS", _controllers["P"]!, "mg/kg"),
+        _buildSensorBox("POTASSIUM", _controllers["K"]!, "mg/kg"),
+        _buildSensorBox("TEMP", _controllers["Temp"]!, "°C"),
+        _buildSensorBox("pH", _controllers["pH"]!, ""),
+        _buildSensorBox("HUMIDITY", _controllers["Humidity"]!, "%"),
+      ],
+    );
+  }
 
   Widget _buildManualActionButton() {
     return SizedBox(
@@ -367,7 +416,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
           padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: const Text("RECOMMEND A CROP", style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: const Text("RECOMMEND A CROP", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1)),
       ),
     );
   }
@@ -395,8 +444,13 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 40, width: 40,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.1), border: Border.all(color: color.withValues(alpha: 0.1))),
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
+        ),
         child: Icon(icon, color: color, size: 20),
       ),
     );

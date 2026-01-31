@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'package:app/components/user_navbar.dart'; // Ensure this path matches your project
 
 class IrrigationFertilizationPage extends StatefulWidget {
   const IrrigationFertilizationPage({super.key});
@@ -28,8 +29,12 @@ class _IrrigationFertilizationPageState
     // Dynamic Theme Variables
     final Color currentBg = isDarkMode ? deepForest : backgroundLight;
     final Color textColor = isDarkMode ? Colors.white : deepForest;
-    final Color cardColor = isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white;
-    final Color borderColor = isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
+    final Color cardColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white;
+    final Color borderColor =
+        isDarkMode
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.05);
 
     return DefaultTabController(
       length: 2,
@@ -38,27 +43,45 @@ class _IrrigationFertilizationPageState
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: textColor,
-              size: 20,
+          centerTitle: true,
+          // FIXED: Standard Leading replaced with Round Back Button matching other pages
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildRoundButton(
+              Icons.arrow_back_ios_new,
+              textColor,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserNavbar()),
+                );
+              },
             ),
-            onPressed: () => Navigator.pop(context),
           ),
           title: Row(
+            mainAxisSize: MainAxisSize.min, // Ensures title stays centered
             children: [
               const Icon(Icons.precision_manufacturing, color: sproutGreen),
               const SizedBox(width: 8),
               Text(
                 'TREATMENT',
-                style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           actions: [
-            _buildThemeToggle(),
-            const SizedBox(width: 12),
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: _buildRoundButton(
+                isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                textColor,
+                onTap: () => setState(() => isDarkMode = !isDarkMode),
+              ),
+            ),
           ],
         ),
         body: Column(
@@ -70,7 +93,10 @@ class _IrrigationFertilizationPageState
                 height: 50,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                  color:
+                      isDarkMode
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: borderColor),
                 ),
@@ -87,7 +113,7 @@ class _IrrigationFertilizationPageState
                       ),
                     ],
                   ),
-                  labelColor: isDarkMode ? Colors.white : Colors.white,
+                  labelColor: Colors.white,
                   unselectedLabelColor: ironGrey,
                   dividerColor: Colors.transparent,
                   labelStyle: const TextStyle(
@@ -104,8 +130,18 @@ class _IrrigationFertilizationPageState
             Expanded(
               child: TabBarView(
                 children: [
-                  _buildMainContent(isFertilization: false, textColor: textColor, cardColor: cardColor, borderColor: borderColor),
-                  _buildMainContent(isFertilization: true, textColor: textColor, cardColor: cardColor, borderColor: borderColor),
+                  _buildMainContent(
+                    isFertilization: false,
+                    textColor: textColor,
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                  ),
+                  _buildMainContent(
+                    isFertilization: true,
+                    textColor: textColor,
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                  ),
                 ],
               ),
             ),
@@ -115,19 +151,19 @@ class _IrrigationFertilizationPageState
     );
   }
 
-  Widget _buildThemeToggle() {
-    final Color iconColor = isDarkMode ? Colors.white : deepForest;
+  // FIXED: Standard Round Button implementation for consistency across app
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
-      onTap: () => setState(() => isDarkMode = !isDarkMode),
+      onTap: onTap,
       child: Container(
         height: 40,
         width: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: iconColor.withValues(alpha: 0.1),
-          border: Border.all(color: iconColor.withValues(alpha: 0.1)),
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode, color: iconColor, size: 20),
+        child: Icon(icon, color: color, size: 18),
       ),
     );
   }
@@ -160,7 +196,15 @@ class _IrrigationFertilizationPageState
               color: cardColor,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: borderColor),
-              boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+              boxShadow:
+                  isDarkMode
+                      ? []
+                      : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 10,
+                        ),
+                      ],
             ),
             child: Column(
               children: [
@@ -182,7 +226,10 @@ class _IrrigationFertilizationPageState
                   ],
                 ),
                 if (isFertilization) ...[
-                  Divider(color: isDarkMode ? Colors.white10 : Colors.black12, height: 40),
+                  Divider(
+                    color: isDarkMode ? Colors.white10 : Colors.black12,
+                    height: 40,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -199,9 +246,9 @@ class _IrrigationFertilizationPageState
           ),
 
           const SizedBox(height: 20),
-          isFertilization 
-            ? _buildNPKStatus(cardColor, borderColor, textColor) 
-            : _buildIrrigationMetrics(cardColor, borderColor, textColor),
+          isFertilization
+              ? _buildNPKStatus(cardColor, borderColor, textColor)
+              : _buildIrrigationMetrics(cardColor, borderColor, textColor),
           const SizedBox(height: 20),
 
           // Glass Button
@@ -305,14 +352,38 @@ class _IrrigationFertilizationPageState
     );
   }
 
-  Widget _buildIrrigationMetrics(Color cardColor, Color borderColor, Color textColor) {
+  Widget _buildIrrigationMetrics(
+    Color cardColor,
+    Color borderColor,
+    Color textColor,
+  ) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildSimpleMetricCard('AVG MOISTURE', '42%', '+2.4%', sproutGreen, cardColor, borderColor, textColor)),
+            Expanded(
+              child: _buildSimpleMetricCard(
+                'AVG MOISTURE',
+                '42%',
+                '+2.4%',
+                sproutGreen,
+                cardColor,
+                borderColor,
+                textColor,
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _buildSimpleMetricCard('PUMP PSI', '85.2', '-1.1', criticalRed, cardColor, borderColor, textColor)),
+            Expanded(
+              child: _buildSimpleMetricCard(
+                'PUMP PSI',
+                '85.2',
+                '-1.1',
+                criticalRed,
+                cardColor,
+                borderColor,
+                textColor,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -332,13 +403,26 @@ class _IrrigationFertilizationPageState
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('WATER USAGE', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                      const Text('WEEKLY TELEMETRY (L)', style: TextStyle(color: ironGrey, fontSize: 10)),
+                      Text(
+                        'WATER USAGE',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        'WEEKLY TELEMETRY (L)',
+                        style: TextStyle(color: ironGrey, fontSize: 10),
+                      ),
                     ],
                   ),
                   Text(
                     '1.2L',
-                    style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -359,7 +443,7 @@ class _IrrigationFertilizationPageState
                   Text('FRI', style: TextStyle(color: ironGrey, fontSize: 10)),
                   Text('SUN', style: TextStyle(color: ironGrey, fontSize: 10)),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -383,7 +467,11 @@ class _IrrigationFertilizationPageState
             children: [
               CustomPaint(
                 size: const Size(120, 180),
-                painter: TankPainter(percent: percent, liquidColor: color, isDarkMode: isDarkMode),
+                painter: TankPainter(
+                  percent: percent,
+                  liquidColor: color,
+                  isDarkMode: isDarkMode,
+                ),
               ),
               Text(
                 '${(percent * 100).toInt()}%',
@@ -473,7 +561,12 @@ class _IrrigationFertilizationPageState
     );
   }
 
-  Widget _buildStatusRing(String letter, String status, Color color, bool isDark) {
+  Widget _buildStatusRing(
+    String letter,
+    String status,
+    Color color,
+    bool isDark,
+  ) {
     return Column(
       children: [
         Stack(
@@ -483,7 +576,11 @@ class _IrrigationFertilizationPageState
               width: 80,
               height: 80,
               child: CustomPaint(
-                painter: GlowRingPainter(color: color, progress: 0.7, isDarkMode: isDark),
+                painter: GlowRingPainter(
+                  color: color,
+                  progress: 0.7,
+                  isDarkMode: isDark,
+                ),
               ),
             ),
             Text(
@@ -516,7 +613,10 @@ class _IrrigationFertilizationPageState
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+            color:
+                isDarkMode
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.05),
             border: Border.all(color: sproutGreen.withValues(alpha: 0.3)),
           ),
           child: Text(
@@ -542,96 +642,150 @@ class _IrrigationFertilizationPageState
   }
 }
 
-// --- Custom Painters ---
-
+// Custom Painters remain the same
 class TankPainter extends CustomPainter {
   final double percent;
   final Color liquidColor;
   final bool isDarkMode;
-  TankPainter({required this.percent, required this.liquidColor, required this.isDarkMode});
+  TankPainter({
+    required this.percent,
+    required this.liquidColor,
+    required this.isDarkMode,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final RRect containerRect = RRect.fromLTRBR(
-      0, 0, size.width, size.height, Radius.circular(size.width / 2),
+      0,
+      0,
+      size.width,
+      size.height,
+      Radius.circular(size.width / 2),
     );
-    final shellPaint = Paint()
-      ..color = isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)
-      ..style = PaintingStyle.fill;
+    final shellPaint =
+        Paint()
+          ..color =
+              isDarkMode
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05)
+          ..style = PaintingStyle.fill;
     canvas.drawRRect(containerRect, shellPaint);
 
     double fillHeight = size.height * (1 - percent);
     if (percent > 0.05) {
-      final glowPaint = Paint()
-        ..color = liquidColor.withValues(alpha: 0.2)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+      final glowPaint =
+          Paint()
+            ..color = liquidColor.withValues(alpha: 0.2)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
       canvas.save();
       canvas.clipRRect(containerRect);
-      canvas.drawRect(Rect.fromLTRB(0, fillHeight, size.width, size.height), glowPaint);
+      canvas.drawRect(
+        Rect.fromLTRB(0, fillHeight, size.width, size.height),
+        glowPaint,
+      );
       canvas.restore();
     }
 
-    final liquidPaint = Paint()
-      ..shader = ui.Gradient.linear(
-        Offset(size.width / 2, fillHeight),
-        Offset(size.width / 2, size.height),
-        [liquidColor.withValues(alpha: 0.5), liquidColor.withValues(alpha: 0.05)],
-      );
+    final liquidPaint =
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(size.width / 2, fillHeight),
+            Offset(size.width / 2, size.height),
+            [
+              liquidColor.withValues(alpha: 0.5),
+              liquidColor.withValues(alpha: 0.05),
+            ],
+          );
 
     canvas.save();
     canvas.clipRRect(containerRect);
-    canvas.drawRect(Rect.fromLTRB(0, fillHeight, size.width, size.height), liquidPaint);
+    canvas.drawRect(
+      Rect.fromLTRB(0, fillHeight, size.width, size.height),
+      liquidPaint,
+    );
     if (percent > 0 && percent < 1.0) {
-      final linePaint = Paint()
-        ..color = liquidColor.withValues(alpha: 0.8)
-        ..strokeWidth = 2
-        ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2);
-      canvas.drawLine(Offset(0, fillHeight), Offset(size.width, fillHeight), linePaint);
+      final linePaint =
+          Paint()
+            ..color = liquidColor.withValues(alpha: 0.8)
+            ..strokeWidth = 2
+            ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2);
+      canvas.drawLine(
+        Offset(0, fillHeight),
+        Offset(size.width, fillHeight),
+        linePaint,
+      );
     }
     canvas.restore();
 
-    final borderPaint = Paint()
-      ..color = isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+    final borderPaint =
+        Paint()
+          ..color =
+              isDarkMode
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.1)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2;
     canvas.drawRRect(containerRect, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant TankPainter oldDelegate) => oldDelegate.percent != percent || oldDelegate.isDarkMode != isDarkMode;
+  bool shouldRepaint(covariant TankPainter oldDelegate) =>
+      oldDelegate.percent != percent || oldDelegate.isDarkMode != isDarkMode;
 }
 
 class GlowRingPainter extends CustomPainter {
   final Color color;
   final double progress;
   final bool isDarkMode;
-  GlowRingPainter({required this.color, required this.progress, required this.isDarkMode});
+  GlowRingPainter({
+    required this.color,
+    required this.progress,
+    required this.isDarkMode,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width / 2) - 4;
-    final trackPaint = Paint()
-      ..color = isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6;
+    final trackPaint =
+        Paint()
+          ..color =
+              isDarkMode
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6;
     canvas.drawCircle(center, radius, trackPaint);
 
-    final glowPaint = Paint()
-      ..color = color.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    final glowPaint =
+        Paint()
+          ..color = color.withValues(alpha: 0.3)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6
-      ..strokeCap = StrokeCap.round;
+    final progressPaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6
+          ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -math.pi / 2, 2 * math.pi * progress, false, glowPaint);
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -math.pi / 2, 2 * math.pi * progress, false, progressPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      glowPaint,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      progressPaint,
+    );
   }
 
   @override
@@ -650,9 +804,24 @@ class WavePainter extends CustomPainter {
 
     final ui.Path path = ui.Path();
     path.moveTo(0, height * 0.7);
-    path.quadraticBezierTo(width * 0.15, height * 0.4, width * 0.3, height * 0.65);
-    path.quadraticBezierTo(width * 0.45, height * 0.9, width * 0.6, height * 0.3);
-    path.quadraticBezierTo(width * 0.75, height * 0.1, width * 0.85, height * 0.8);
+    path.quadraticBezierTo(
+      width * 0.15,
+      height * 0.4,
+      width * 0.3,
+      height * 0.65,
+    );
+    path.quadraticBezierTo(
+      width * 0.45,
+      height * 0.9,
+      width * 0.6,
+      height * 0.3,
+    );
+    path.quadraticBezierTo(
+      width * 0.75,
+      height * 0.1,
+      width * 0.85,
+      height * 0.8,
+    );
     path.lineTo(width, height * 0.2);
 
     final ui.Path fillPath = ui.Path.from(path);
@@ -660,19 +829,21 @@ class WavePainter extends CustomPainter {
     fillPath.lineTo(0, height);
     fillPath.close();
 
-    final Paint fillPaint = Paint()
-      ..shader = ui.Gradient.linear(
-        Offset(0, height * 0.2),
-        Offset(0, height),
-        [color.withValues(alpha: 0.4), color.withValues(alpha: 0.0)],
-      );
+    final Paint fillPaint =
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(0, height * 0.2),
+            Offset(0, height),
+            [color.withValues(alpha: 0.4), color.withValues(alpha: 0.0)],
+          );
 
-    final Paint linePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 3);
+    final Paint linePaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 3);
 
     canvas.drawPath(fillPath, fillPaint);
     canvas.drawPath(path, linePaint);

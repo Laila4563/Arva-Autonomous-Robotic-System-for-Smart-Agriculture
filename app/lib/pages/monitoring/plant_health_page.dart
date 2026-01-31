@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/components/user_navbar.dart'; // Ensure this import is correct for your project path
 
 class PlantHealthPage extends StatefulWidget {
   const PlantHealthPage({super.key});
@@ -34,21 +35,37 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- TOP BAR (Back Button + Theme Switch) ---
+                // --- TOP BAR (Back Button + Centered Title + Theme Switch) ---
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // BACK BUTTON (Left Side)
+                      // BACK BUTTON (Left) - Fixed to return to UserNavbar
                       _buildRoundButton(
                         Icons.arrow_back_ios_new,
                         textColor,
                         onTap: () {
-                          Navigator.pop(context); // Goes back to the previous page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const UserNavbar()),
+                          );
                         },
                       ),
-                      // THEME TOGGLE (Right Side)
+                      
+                      // CENTERED TITLE
+                      Expanded(
+                        child: Text(
+                          "Plant Health",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+
+                      // THEME TOGGLE (Right)
                       _buildRoundButton(
                         isDarkMode ? Icons.light_mode : Icons.dark_mode,
                         textColor,
@@ -62,17 +79,6 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
-                Center(
-                  child: Text(
-                    "Plant Health",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 20),
 
                 _buildSectionHeader("Disease Prevalence Analytics", textColor),
@@ -83,6 +89,7 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
                 _buildSectionHeader("Neural Analysis Feed", textColor),
                 const SizedBox(height: 12),
 
+                // Analysis Cards
                 _buildAnalysisCard(
                   title: "Apple Scab Leaf",
                   status: "UNHEALTHY",
@@ -143,7 +150,6 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
 
   // --- HELPER WIDGETS ---
 
-  // Reusable round button from your Registration UI
   Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -152,11 +158,10 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
         width: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          // Updated to new Flutter value standard
           color: color.withValues(alpha: 0.1),
           border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: Icon(icon, color: color, size: 18),
       ),
     );
   }
@@ -279,7 +284,15 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
                 ),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(11), bottomLeft: Radius.circular(11)),
-                  child: Image.asset(imagePath, fit: BoxFit.contain),
+                  child: Image.asset(
+                    imagePath, 
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.eco,
+                      color: Colors.white24,
+                      size: 40,
+                    ),
+                  ),
                 ),
               ),
               Expanded(
