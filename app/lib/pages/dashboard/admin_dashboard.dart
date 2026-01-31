@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+  final bool isDarkMode;
+  final VoidCallback onThemeToggle;
+
+  const AdminDashboard({
+    super.key,
+    required this.isDarkMode,
+    required this.onThemeToggle,
+  });
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  bool isDarkMode = true;
-
   // --- THEME COLORS ---
   static const Color sproutGreen = Color(0xFF88B04B);
-  // static const Color skyBlue = Color(0xFF56B9C7);
   static const Color harvestGold = Color(0xFFE69F21);
   static const Color deepForest = Color(0xFF0A150F);
   static const Color ironGrey = Color(0xFF546E7A);
@@ -22,10 +26,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final Color currentBg = isDarkMode ? deepForest : backgroundLight;
-    final Color cardColor = isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white;
-    final Color borderColor = isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
-    final Color mainTextColor = isDarkMode ? Colors.white : deepForest;
+    final bool dark = widget.isDarkMode;
+    final Color currentBg = dark ? deepForest : backgroundLight;
+    final Color cardColor = dark ? Colors.white.withValues(alpha: 0.03) : Colors.white;
+    final Color borderColor = dark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
+    final Color mainTextColor = dark ? Colors.white : deepForest;
 
     return Scaffold(
       backgroundColor: currentBg,
@@ -54,21 +59,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   style: TextStyle(color: sproutGreen, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ],
-            )
+            ),
           ],
         ),
         actions: [
-          // Replaced Bell with Theme Toggle from Login Page
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: _buildRoundButton(
-              isDarkMode ? Icons.light_mode : Icons.dark_mode,
-              isDarkMode ? Colors.white : deepForest,
-              onTap: () {
-                setState(() {
-                  isDarkMode = !isDarkMode;
-                });
-              },
+              dark ? Icons.light_mode : Icons.dark_mode,
+              dark ? Colors.white : deepForest,
+              onTap: widget.onThemeToggle,
             ),
           ),
         ],
@@ -117,8 +117,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // --- UI BUILDER METHODS ---
-
   Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -143,18 +141,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.1),
-              ),
+              Text(title, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
               if (showWarning) ...[
                 const SizedBox(width: 8),
                 const Icon(Icons.warning_amber_rounded, color: criticalRed, size: 16),
-              ]
+              ],
             ],
           ),
-          if (isLive)
-            const Text('LIVE', style: TextStyle(color: sproutGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+          if (isLive) const Text('LIVE', style: TextStyle(color: sproutGreen, fontSize: 10, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -173,7 +167,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('LOCAL TEMP', style: TextStyle(color: ironGrey, fontSize: 10, fontWeight: FontWeight.bold)),
-                  Text('78° F', style: TextStyle(color: text, fontSize: 32, fontWeight: FontWeight.bold)),
+                  Text('78° C', style: TextStyle(color: text, fontSize: 32, fontWeight: FontWeight.bold)),
                 ],
               ),
               const Column(
@@ -181,7 +175,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Icon(Icons.wb_cloudy_outlined, color: sproutGreen, size: 32),
                   Text('CLEAR SKIES', style: TextStyle(color: sproutGreen, fontSize: 10, fontWeight: FontWeight.bold)),
                 ],
-              )
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -212,10 +206,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       Text('Heavy precipitation expected in 45m.', style: TextStyle(color: ironGrey, fontSize: 11)),
                     ],
                   ),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -243,7 +237,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   const Text('ACTIVE SESSIONS', style: TextStyle(color: ironGrey, fontSize: 10, fontWeight: FontWeight.bold)),
                   Text('142', style: TextStyle(color: text, fontSize: 24, fontWeight: FontWeight.bold)),
                 ],
-              )
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -274,7 +268,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               children: [
                 CustomPaint(
                   size: const Size(100, 100),
-                  painter: GlowWheelPainter(sproutGreen, isDarkMode ? criticalRed : ironGrey.withValues(alpha: 0.2), 0.85),
+                  painter: GlowWheelPainter(
+                    sproutGreen,
+                    widget.isDarkMode ? criticalRed : ironGrey.withValues(alpha: 0.2),
+                    0.85,
+                  ),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -282,7 +280,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     Text('428', style: TextStyle(color: text, fontSize: 20, fontWeight: FontWeight.bold)),
                     const Text('TOTAL', style: TextStyle(color: ironGrey, fontSize: 8)),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -297,34 +295,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('UPTIME: 99.8%', style: TextStyle(color: sproutGreen, fontSize: 12, fontWeight: FontWeight.bold)),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAlertCard({
-    required String user, 
-    required String title, 
-    required String desc, 
-    required String time, 
-    required Color color,
-    required Color cardColor,
-    required Color borderColor,
-    required Color textColor,
-  }) {
+  Widget _buildAlertCard({required String user, required String title, required String desc, required String time, required Color color, required Color cardColor, required Color borderColor, required Color textColor}) {
     return _glassContainer(
       bg: cardColor,
       border: borderColor,
       padding: 0,
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: color, width: 4)),
-        ),
+        decoration: BoxDecoration(border: Border(left: BorderSide(color: color, width: 4))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -348,11 +335,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _glassContainer({required Widget child, required Color bg, required Color border, double padding = 16}) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: border)),
       child: child,
     );
   }
@@ -360,10 +343,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _weatherSubTile(IconData icon, String label, String val, Color text) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: text.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: text.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
           Icon(icon, color: sproutGreen, size: 18),
@@ -371,10 +351,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Text(label, style: TextStyle(color: ironGrey, fontSize: 8, fontWeight: FontWeight.bold)),
+              Text(label, style: const TextStyle(color: ironGrey, fontSize: 8, fontWeight: FontWeight.bold)),
               Text(val, style: TextStyle(color: text, fontSize: 14, fontWeight: FontWeight.bold)),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -383,10 +363,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _topUserTile(String initial, String name, String sub, String score, Color text) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: text.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: text.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
           Container(
@@ -394,7 +371,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             height: 36,
             decoration: BoxDecoration(color: sproutGreen.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
             alignment: Alignment.center,
-            child:  Text(initial, style: TextStyle(color: sproutGreen, fontWeight: FontWeight.bold)),
+            child: Text(initial, style: const TextStyle(color: sproutGreen, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -402,7 +379,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: TextStyle(color: text, fontSize: 13, fontWeight: FontWeight.bold)),
-                 Text(sub, style: TextStyle(color: ironGrey, fontSize: 10)),
+                Text(sub, style: const TextStyle(color: ironGrey, fontSize: 10)),
               ],
             ),
           ),
@@ -412,7 +389,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Text(score, style: const TextStyle(color: sproutGreen, fontSize: 14, fontWeight: FontWeight.bold)),
               const Text('MONITORING SCORE', style: TextStyle(color: ironGrey, fontSize: 7, fontWeight: FontWeight.bold)),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -435,38 +412,19 @@ class GlowWheelPainter extends CustomPainter {
   final Color onlineColor;
   final Color offlineColor;
   final double percent;
-
   GlowWheelPainter(this.onlineColor, this.offlineColor, this.percent);
-
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width / 2) - 4;
     final rect = Rect.fromCircle(center: center, radius: radius);
-
-    final trackPaint = Paint()
-      ..color = offlineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
-    final glowPaint = Paint()
-      ..color = onlineColor.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-
-    final progressPaint = Paint()
-      ..color = onlineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
+    final trackPaint = Paint()..color = offlineColor..style = PaintingStyle.stroke..strokeWidth = 8..strokeCap = StrokeCap.round;
+    final glowPaint = Paint()..color = onlineColor.withValues(alpha: 0.3)..style = PaintingStyle.stroke..strokeWidth = 12..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    final progressPaint = Paint()..color = onlineColor..style = PaintingStyle.stroke..strokeWidth = 8..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, radius, trackPaint);
     canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * percent, false, glowPaint);
     canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * percent, false, progressPaint);
   }
-
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
