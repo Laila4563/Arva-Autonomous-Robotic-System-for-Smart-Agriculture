@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:app/components/user_navbar.dart'; 
 
 class AdminDashboard extends StatefulWidget {
   final bool isDarkMode;
@@ -38,6 +39,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        // BACK ARROW REMOVED (leading is empty)
+        automaticallyImplyLeading: false, 
         title: Column(
           children: [
             Text(
@@ -63,6 +66,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ],
         ),
         actions: [
+          // ✨ NEW: LOGOUT BUTTON
+          _buildRoundButton(
+            Icons.logout,
+            criticalRed,
+            onTap: () {
+              // Clears stack and returns to login
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const UserNavbar()),
+                (route) => false,
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+          // THEME SWITCH
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: _buildRoundButton(

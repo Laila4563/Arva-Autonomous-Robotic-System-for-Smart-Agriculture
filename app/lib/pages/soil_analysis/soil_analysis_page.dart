@@ -1,3 +1,4 @@
+import 'package:app/components/user_navbar.dart';
 import 'package:flutter/material.dart';
 
 // Global color palette to ensure all classes can access them
@@ -36,9 +37,17 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.sproutGreen),
-          onPressed: () => Navigator.pop(context),
+        // FIXED: Leading widget now uses a round button style for consistency
+leading: Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: _buildRoundButton(
+    Icons.arrow_back_ios_new,
+    textColor,
+    onTap: () {
+      // ✅ CORRECT: Tell the parent UserNavbar to switch back to Home
+      UserNavbar.of(context)?.setIndex(0);
+    },
+          ),
         ),
         title: Text(
           'Soil Analysis',
@@ -171,7 +180,7 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
                             children: [
                               const Icon(Icons.thermostat, color: AppColors.harvestGold, size: 16),
                               const SizedBox(width: 4),
-                              Text('Soil Temp', style: TextStyle(color: subTextColor, fontSize: 14)),
+                              Text('Soil Temp', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -191,7 +200,7 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
                             children: [
                               const Icon(Icons.bolt, color: AppColors.skyBlue, size: 16),
                               const SizedBox(width: 4),
-                              Text('Conductivity', style: TextStyle(color: subTextColor, fontSize: 14)),
+                              Text('Conductivity', style: TextStyle(color: AppColors.ironGrey, fontSize: 14)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -243,21 +252,30 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
     );
   }
 
-  Widget _buildThemeToggle() {
-    final Color iconColor = isDarkMode ? Colors.white : AppColors.deepForest;
+  // FIXED: Reusable round button to match the theme toggle and back arrow style
+  Widget _buildRoundButton(IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
-      onTap: () => setState(() => isDarkMode = !isDarkMode),
+      onTap: onTap,
       child: Container(
         height: 40,
         width: 40,
-        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: iconColor.withValues(alpha: 0.1),
-          border: Border.all(color: iconColor.withValues(alpha: 0.1)),
+          color: color.withValues(alpha: 0.1),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode, color: iconColor, size: 20),
+        child: Icon(icon, color: color, size: 18),
       ),
+    );
+  }
+
+  Widget _buildThemeToggle() {
+    final Color iconColor = isDarkMode ? Colors.white : AppColors.deepForest;
+    // Uses the fixed round button helper for visual consistency
+    return _buildRoundButton(
+      isDarkMode ? Icons.light_mode : Icons.dark_mode,
+      iconColor,
+      onTap: () => setState(() => isDarkMode = !isDarkMode),
     );
   }
 
@@ -307,8 +325,7 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
   }
 }
 
-// --- Custom Components ---
-
+// Custom Components remain unchanged to preserve your structure
 class PHSlider extends StatelessWidget {
   final double phValue;
   final bool isDarkMode;
