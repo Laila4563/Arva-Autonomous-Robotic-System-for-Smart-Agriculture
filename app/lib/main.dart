@@ -30,8 +30,8 @@ class App extends StatelessWidget {
       // Start at the Navbar to handle the admin state
       initialRoute: '/user_main',
       routes: {
-        '/': (context) => const LandingPage(),
-        '/login': (context) => const LoginPage(),
+        // '/': (context) => const LandingPage(),
+        // '/login': (context) => const LoginPage(),
         '/register': (context) => const RegistrationPage(),
         '/user_dashboard': (context) => const UserDashboard(),
         '/user_profile': (context) => const UserProfile(),
@@ -46,7 +46,7 @@ class App extends StatelessWidget {
         '/pest_detection': (context) => const PestDetectionPage(),
         '/irrigation_fertilization':
             (context) => const IrrigationFertilizationPage(),
-        '/landing_page': (context) => const LandingPage(),
+        // '/landing_page': (context) => const LandingPage(),
       },
     );
   }

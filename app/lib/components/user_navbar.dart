@@ -21,22 +21,51 @@ class UserNavbar extends StatefulWidget {
 class _UserNavbarState extends State<UserNavbar> {
   int _currentIndex = 0;
   bool isDarkMode = true;
+  bool isLoggedIn = false; // Initial state: Logged out
 
   static const Color sproutGreen = Color(0xFF88B04B);
   static const Color ironGrey = Color(0xFF546E7A);
   static const Color deepForest = Color(0xFF0A150F);
 
-  // 1. ALL pages are now inside the IndexedStack to keep the navbar visible
-  final List<Widget> _pages = [
-    const LandingPage(),                // index 0
-    const UserDashboard(),              // index 1
-    const UserProfile(),                // index 2
-    const SoilAnalysisPage(),           // index 3
-    const PestDetectionPage(),          // index 4
-    const IrrigationFertilizationPage(),// index 5
-    const CropRecommendationPage(),     // index 6
-    const PlantHealthPage(),            // index 7
-  ];
+  // --- AUTH LOGIC ---
+  void loginUser() {
+    setState(() {
+      isLoggedIn = true;
+      _currentIndex = 1; // Auto-jump to Dashboard on login
+    });
+  }
+
+  void logoutUser() {
+    setState(() {
+      isLoggedIn = false;
+      _currentIndex = 0; // Return to Home on logout
+    });
+  }
+
+  // 1. DYNAMIC PAGE LIST
+  List<Widget> get _pages {
+    if (!isLoggedIn) {
+      return [
+        LandingPage(isLoggedIn: isLoggedIn, onLoginSuccess: loginUser, onLogout: logoutUser), // index 0
+        const SoilAnalysisPage(),             // index 1
+        const PestDetectionPage(),            // index 2
+        const IrrigationFertilizationPage(),  // index 3
+        const CropRecommendationPage(),       // index 4
+        const PlantHealthPage(),              // index 5
+      ];
+    } else {
+      return [
+        LandingPage(isLoggedIn: isLoggedIn, onLoginSuccess: loginUser, onLogout: logoutUser), // index 0
+        const UserDashboard(),                // index 1
+        const UserProfile(),                  // index 2
+        const SoilAnalysisPage(),             // index 3
+        const PestDetectionPage(),            // index 4
+        const IrrigationFertilizationPage(),  // index 5
+        const CropRecommendationPage(),       // index 6
+        const PlantHealthPage(),              // index 7
+      ];
+    }
+  }
 
   void _showMoreMenu(BuildContext context) {
     showModalBottomSheet(
@@ -49,7 +78,7 @@ class _UserNavbarState extends State<UserNavbar> {
           decoration: BoxDecoration(
             color: deepForest,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            border: Border.all(color: sproutGreen.withOpacity(0.3), width: 1),
+            border: Border.all(color: sproutGreen.withValues(alpha: 0.3), width: 1),
           ),
           child: Column(
             children: [
@@ -65,14 +94,21 @@ class _UserNavbarState extends State<UserNavbar> {
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 3,
-                  children: [
-                    // Instead of Navigator.push, we change the index of the IndexedStack
-                    _buildOverlayItem(Icons.bug_report_rounded, 'PESTS', 4),
-                    _buildOverlayItem(Icons.water_drop_rounded, 'TREATMENT', 5),
-                    _buildOverlayItem(Icons.auto_awesome_rounded, 'CROP RECOMMENDATION', 6),
-                    _buildOverlayItem(Icons.center_focus_strong_rounded, 'PLANT HEALTH', 7),
-                    _buildOverlayItem(Icons.science_rounded, 'SOIL ANALYSIS', 3),
-                  ],
+                  children: isLoggedIn 
+                    ? [
+                        _buildOverlayItem(Icons.bug_report_rounded, 'PESTS', 4),
+                        _buildOverlayItem(Icons.water_drop_rounded, 'TREATMENT', 5),
+                        _buildOverlayItem(Icons.auto_awesome_rounded, 'CROP', 6),
+                        _buildOverlayItem(Icons.center_focus_strong_rounded, 'HEALTH', 7),
+                        _buildOverlayItem(Icons.science_rounded, 'SOIL', 3),
+                      ]
+                    : [
+                        _buildOverlayItem(Icons.bug_report_rounded, 'PESTS', 2),
+                        _buildOverlayItem(Icons.water_drop_rounded, 'TREATMENT', 3),
+                        _buildOverlayItem(Icons.auto_awesome_rounded, 'CROP', 4),
+                        _buildOverlayItem(Icons.center_focus_strong_rounded, 'HEALTH', 5),
+                        _buildOverlayItem(Icons.science_rounded, 'SOIL', 1),
+                      ],
                 ),
               ),
             ],
@@ -85,9 +121,9 @@ class _UserNavbarState extends State<UserNavbar> {
   Widget _buildOverlayItem(IconData icon, String label, int targetIndex) {
     return GestureDetector(
       onTap: () {
-        Navigator.pop(context); // Close the menu
+        Navigator.pop(context);
         setState(() {
-          _currentIndex = targetIndex; // Switch the page inside the stack
+          _currentIndex = targetIndex;
         });
       },
       child: Column(
@@ -96,8 +132,8 @@ class _UserNavbarState extends State<UserNavbar> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: sproutGreen.withOpacity(0.1),
-              border: Border.all(color: sproutGreen.withOpacity(0.2)),
+              color: sproutGreen.withValues(alpha: 0.1),
+              border: Border.all(color: sproutGreen.withValues(alpha: 0.2)),
             ),
             child: Icon(icon, color: sproutGreen, size: 28),
           ),
@@ -110,13 +146,12 @@ class _UserNavbarState extends State<UserNavbar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color navBgColor = isDarkMode ? Colors.black.withOpacity(0.5) : Colors.white.withOpacity(0.6);
+    final Color navBgColor = isDarkMode ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.6);
 
     return Scaffold(
       backgroundColor: isDarkMode ? deepForest : const Color(0xFFF6F8F6),
       resizeToAvoidBottomInset: false,
       extendBody: true,
-      // The IndexedStack now contains every page you want the navbar to stay on
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: ClipRRect(
         child: BackdropFilter(
@@ -124,13 +159,13 @@ class _UserNavbarState extends State<UserNavbar> {
           child: Container(
             decoration: BoxDecoration(
               color: navBgColor,
-              border: Border(top: BorderSide(color: sproutGreen.withOpacity(0.3), width: 0.5)),
+              border: Border(top: BorderSide(color: sproutGreen.withValues(alpha: 0.3), width: 0.5)),
             ),
             child: BottomNavigationBar(
-              // Logic to handle which icon stays "glowing" when sub-pages are active
               currentIndex: _getNavbarIndex(_currentIndex),
               onTap: (index) {
-                if (index == 4) {
+                int moreIndex = isLoggedIn ? 4 : 2;
+                if (index == moreIndex) {
                   _showMoreMenu(context);
                 } else {
                   setState(() => _currentIndex = index);
@@ -138,18 +173,12 @@ class _UserNavbarState extends State<UserNavbar> {
               },
               backgroundColor: Colors.transparent,
               selectedItemColor: sproutGreen,
-              unselectedItemColor: ironGrey.withOpacity(0.5),
+              unselectedItemColor: ironGrey.withValues(alpha: 0.5),
               selectedFontSize: 10,
               unselectedFontSize: 10,
               type: BottomNavigationBarType.fixed,
               elevation: 0,
-              items: [
-                _buildGlowItem(Icons.home_rounded, 'HOME', 0),
-                _buildGlowItem(Icons.grid_view_rounded, 'DASHBOARD', 1),
-                _buildGlowItem(Icons.person_rounded, 'PROFILE', 2),
-                _buildGlowItem(Icons.science_rounded, 'SOIL', 3),
-                _buildGlowItem(Icons.more_horiz_rounded, 'MORE', 4),
-              ],
+              items: _buildNavbarItems(),
             ),
           ),
         ),
@@ -157,10 +186,31 @@ class _UserNavbarState extends State<UserNavbar> {
     );
   }
 
-  // Helper to keep the correct navbar icon lit up even on sub-pages
+  // 2. DYNAMIC NAVBAR ITEMS
+  List<BottomNavigationBarItem> _buildNavbarItems() {
+    if (!isLoggedIn) {
+      return [
+        _buildGlowItem(Icons.home_rounded, 'HOME', 0),
+        _buildGlowItem(Icons.science_rounded, 'SOIL', 1),
+        _buildGlowItem(Icons.more_horiz_rounded, 'MORE', 2),
+      ];
+    } else {
+      return [
+        _buildGlowItem(Icons.home_rounded, 'HOME', 0),
+        _buildGlowItem(Icons.grid_view_rounded, 'DASHBOARD', 1),
+        _buildGlowItem(Icons.person_rounded, 'PROFILE', 2),
+        _buildGlowItem(Icons.science_rounded, 'SOIL', 3),
+        _buildGlowItem(Icons.more_horiz_rounded, 'MORE', 4),
+      ];
+    }
+  }
+
   int _getNavbarIndex(int stackIndex) {
-    if (stackIndex >= 4) return 4; // If we are on Pests/Water/AI/Health, highlight "MORE"
-    return stackIndex;
+    if (!isLoggedIn) {
+      return stackIndex >= 2 ? 2 : stackIndex;
+    } else {
+      return stackIndex >= 4 ? 4 : stackIndex;
+    }
   }
 
   BottomNavigationBarItem _buildGlowItem(IconData icon, String label, int navIndex) {
@@ -175,10 +225,10 @@ class _UserNavbarState extends State<UserNavbar> {
               width: 40, height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: sproutGreen.withOpacity(0.4), blurRadius: 15, spreadRadius: 1)],
+                boxShadow: [BoxShadow(color: sproutGreen.withValues(alpha: 0.4), blurRadius: 15, spreadRadius: 1)],
               ),
             ),
-          Icon(icon, color: isActive ? sproutGreen : ironGrey.withOpacity(0.8), size: 24),
+          Icon(icon, color: isActive ? sproutGreen : ironGrey.withValues(alpha: 0.8), size: 24),
         ],
       ),
       label: label,
