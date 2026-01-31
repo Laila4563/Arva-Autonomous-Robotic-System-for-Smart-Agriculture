@@ -29,20 +29,18 @@ class _LoginPageState extends State<LoginPage> {
 
   // --- 2. LOGIN LOGIC FUNCTION ---
   void _handleLogin() {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
+  final String email = _emailController.text.trim();
+  final String password = _passwordController.text.trim();
 
-    if (email == "admin@arva.com" && password == "admin123") {
-      // Admin bypasses the UserNavbar logic and goes to Admin portal
-      Navigator.pushReplacementNamed(context, '/admin_main');
-    } else if (email == "user@arva.com" && password == "user123") {
-      // ✨ TRIGGER: Call the callback function to show Dashboard/Profile in the Navbar
-      widget.onLoginSuccess();
-      
-      // Close the login page to return to the now-unlocked Navbar
-      Navigator.pop(context);
-    } else {
-      // Show error for invalid credentials
+  if (email == "admin@arva.com" && password == "admin123") {
+    // 1. ADMIN: Jumps to a completely separate route (no UserNavbar)
+    Navigator.pushReplacementNamed(context, '/admin_main');
+  } else if (email == "user@arva.com" && password == "user123") {
+    // 2. USER: Calls callback to show navbar and moves to dashboard
+    widget.onLoginSuccess();
+    Navigator.pop(context); 
+  } else {
+       // Show error for invalid credentials
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.redAccent,

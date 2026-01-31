@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app/components/user_navbar.dart'; // Ensure this import is correct for your project path
+import 'package:app/components/user_navbar.dart'; // Ensure this import is correct
 
 class PlantHealthPage extends StatefulWidget {
   const PlantHealthPage({super.key});
@@ -40,15 +40,13 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
                     children: [
-                      // BACK BUTTON (Left) - Fixed to return to UserNavbar
+                      // ✨ FIXED: BACK BUTTON - Now uses setIndex(0) instead of Navigator
                       _buildRoundButton(
                         Icons.arrow_back_ios_new,
                         textColor,
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const UserNavbar()),
-                          );
+                          // Correctly switches back to the Landing Page without losing login state
+                          UserNavbar.of(context)?.setIndex(0);
                         },
                       ),
                       

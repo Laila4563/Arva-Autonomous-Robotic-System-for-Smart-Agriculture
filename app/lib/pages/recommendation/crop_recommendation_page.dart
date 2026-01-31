@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app/components/user_navbar.dart'; // Ensure this import is correct for your project
+import 'package:app/components/user_navbar.dart'; // Ensure this import is correct
 
 class CropRecommendationPage extends StatefulWidget {
   const CropRecommendationPage({super.key});
@@ -52,17 +52,15 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        // FIXED: Added Exactly the same Back Arrow logic as Soil Analysis
+        // ✨ FIXED: Now calls UserNavbar.of(context)?.setIndex(0) instead of pushing a new Navbar
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _buildRoundButton(
             Icons.arrow_back_ios_new,
             textColor,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserNavbar()),
-              );
+              // Switches tab to HOME (index 0) without resetting app state
+              UserNavbar.of(context)?.setIndex(0);
             },
           ),
         ),
@@ -451,7 +449,7 @@ class _CropRecommendationPageState extends State<CropRecommendationPage> {
           color: color.withValues(alpha: 0.1),
           border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: Icon(icon, color: color, size: 18),
       ),
     );
   }

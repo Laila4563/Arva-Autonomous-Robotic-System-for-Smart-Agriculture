@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // Import your pages here
-import 'pages/auth/login_page.dart';
+// import 'pages/auth/login_page.dart';
 import 'pages/auth/registration_page.dart';
 import 'pages/dashboard/user_dashboard.dart';
 import 'pages/monitoring/plant_health_page.dart';
@@ -8,7 +8,7 @@ import 'pages/monitoring/pest_detection_page.dart';
 import 'pages/soil_analysis/soil_analysis_page.dart';
 import 'pages/recommendation/crop_recommendation_page.dart';
 import 'pages/treatment/irrigation_fertilization_page.dart';
-import 'pages/Landing Page/landing_page.dart';
+// import 'pages/Landing Page/landing_page.dart';
 import 'pages/dashboard/user_profile.dart';
 
 // NEW IMPORT: Navigation Controller

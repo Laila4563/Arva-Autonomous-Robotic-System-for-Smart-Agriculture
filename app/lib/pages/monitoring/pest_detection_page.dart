@@ -11,10 +11,10 @@ class PestDetectionPage extends StatefulWidget {
 class _PestDetectionPageState extends State<PestDetectionPage> {
   bool isDarkMode = true;
 
-  // --- THEME COLORS (Matched to Registration Page) ---
+  // --- THEME COLORS ---
   static const Color sproutGreen = Color(0xFF88B04B);
-  static const Color skyBlue = Color(0xFF56B9C7); 
-  static const Color skyBlueDark = Color(0xFF007A8A); 
+  static const Color skyBlue = Color(0xFF56B9C7);
+  static const Color skyBlueDark = Color(0xFF007A8A);
   static const Color harvestGold = Color(0xFFE69F21);
   static const Color deepForest = Color(0xFF102210);
   static const Color ironGrey = Color(0xFF546E7A);
@@ -27,10 +27,11 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
     final Color currentBg = isDarkMode ? deepForest : backgroundLight;
     final Color textColor = isDarkMode ? Colors.white : deepForest;
     final Color subTextColor = isDarkMode ? skyBlue : skyBlueDark;
-    
-    final Color cardColor = isDarkMode 
-        ? Colors.white.withValues(alpha: 0.05) 
-        : Colors.black.withValues(alpha: 0.05);
+
+    final Color cardColor =
+        isDarkMode
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       backgroundColor: currentBg,
@@ -38,21 +39,18 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        // FIXED: Leading widget now uses the round button style for consistency
+        // ✨ FIXED: Now calls UserNavbar.of(context)?.setIndex(0)
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _buildRoundButton(
             Icons.arrow_back_ios_new,
             textColor,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserNavbar()),
-              );
+              // Switches tab to HOME without reloading the app
+              UserNavbar.of(context)?.setIndex(0);
             },
           ),
         ),
-        // CENTERED TITLE WITH LIVE FEED STATUS
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -157,10 +155,7 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
                   ),
                   const Text(
                     "Potential pest presence identified in Sector B-12",
-                    style: TextStyle(
-                      color: sproutGreen,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: sproutGreen, fontSize: 14),
                   ),
                 ],
               ),
@@ -268,7 +263,7 @@ class _PestDetectionPageState extends State<PestDetectionPage> {
           color: color.withValues(alpha: 0.1),
           border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
-        child: Icon(icon, color: color, size: 18), // Reduced size to match others
+        child: Icon(icon, color: color, size: 18),
       ),
     );
   }

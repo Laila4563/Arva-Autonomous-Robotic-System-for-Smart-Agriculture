@@ -38,18 +38,15 @@ class _SoilAnalysisPageState extends State<SoilAnalysisPage> {
         elevation: 0,
         centerTitle: true,
         // FIXED: Leading widget now uses a round button style for consistency
-       leading: Padding(
+leading: Padding(
   padding: const EdgeInsets.all(8.0),
   child: _buildRoundButton(
     Icons.arrow_back_ios_new,
     textColor,
-          onTap: () {
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => const UserNavbar()),
-    (route) => false, // This removes all previous screens from memory
-  );
-},
+    onTap: () {
+      // ✅ CORRECT: Tell the parent UserNavbar to switch back to Home
+      UserNavbar.of(context)?.setIndex(0);
+    },
           ),
         ),
         title: Text(
